@@ -6,18 +6,27 @@ prerequisites:
     3. repo pushed to github so remote workers can clone it
 
 usage:
-    python scripts/runpod_train.py --phase datagen --datagen-mode demo
-    python scripts/runpod_train.py --phase all
-    python scripts/runpod_train.py --phase encoder
-    python scripts/runpod_train.py --phase all --dev
+    # full pipeline: generate real data with LLM + train all phases
+    python scripts/runpod_train.py --phase all --datagen-mode llm --num-users 500
+
+    # generate data only (saved to network volume)
     python scripts/runpod_train.py --phase datagen --datagen-mode llm --num-users 500
+
+    # train using pre-generated data on network volume
+    python scripts/runpod_train.py --phase all --datagen-mode skip
+
+    # quick dev run with demo data
+    python scripts/runpod_train.py --phase all --dev
+
+    # single phase
+    python scripts/runpod_train.py --phase encoder
 """
 
 import argparse
 import asyncio
 from pathlib import Path
 
-from runpod_flash import remote, LiveServerless, GpuGroup, PodTemplate
+from runpod_flash import remote, LiveServerless, GpuGroup, PodTemplate, NetworkVolume, DataCenter
 
 # sdk doesnt have blackwell yet, monkey patch it in
 GpuGroup._value2member_map_["BLACKWELL_180"] = None
@@ -30,26 +39,31 @@ GpuGroup._member_map_["BLACKWELL_180"] = BLACKWELL_180
 REPO_URL = "https://github.com/kajdev/engram.git"
 REPO_BRANCH = "main"
 
+# persistent network volume for data + model weights
+engram_volume = NetworkVolume(name="engram-data", size=100)
+
 # gpu config for training
 train_gpu = LiveServerless(
     name="engram-train",
     gpus=[BLACKWELL_180],
-    workersMax=1,
+    workersMax=3,
+    workersMin=1,
     template=PodTemplate(
         containerDiskInGb=100,
-        volumeInGb=50,
     ),
+    networkVolume=engram_volume,
 )
 
 # gpu for datagen with open source llm via vllm
 datagen_gpu = LiveServerless(
     name="engram-datagen",
     gpus=[BLACKWELL_180],
-    workersMax=1,
+    workersMax=3,
+    workersMin=1,
     template=PodTemplate(
         containerDiskInGb=100,
-        volumeInGb=50,
     ),
+    networkVolume=engram_volume,
 )
 
 
@@ -80,6 +94,7 @@ def generate_data_remote(
     """generate training data on a gpu worker."""
     import subprocess, os, sys
     import shutil
+
     engram_dir = "/workspace/engram"
     if os.path.exists(engram_dir):
         shutil.rmtree(engram_dir)
@@ -90,7 +105,7 @@ def generate_data_remote(
 
     from pathlib import Path
 
-    data_dir = Path("/workspace/data")
+    data_dir = Path("/runpod-volume/data")
 
     if mode == "demo":
         from engram.training.datagen import generate_demo_dataset
@@ -163,6 +178,8 @@ def generate_data_remote(
         "networkx",
         "leidenalg",
         "igraph",
+        "vllm",
+        "openai",
     ],
 )
 def train_all_remote(
@@ -175,6 +192,7 @@ def train_all_remote(
     """generate data and run all three training phases on gpu."""
     import subprocess, os, sys
     import shutil
+
     engram_dir = "/workspace/engram"
     if os.path.exists(engram_dir):
         shutil.rmtree(engram_dir)
@@ -201,28 +219,46 @@ def train_all_remote(
     print(f"cuda available: {torch.cuda.is_available()}")
     if torch.cuda.is_available():
         print(f"gpu: {torch.cuda.get_device_name(0)}")
-        print(f"gpu memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.1f}GB")
+        print(
+            f"gpu memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.1f}GB"
+        )
         print(f"cuda version: {torch.version.cuda}")
     print()
 
-    data_dir = Path("/workspace/data")
+    data_dir = Path("/runpod-volume/data")
 
     # generate data on the same worker
     if datagen_mode == "demo":
         from engram.training.datagen import generate_demo_dataset
+
         print("[0/3] generating demo data...")
         datagen_start = time.time()
         stats = generate_demo_dataset(data_dir, seed=42)
         print(f"  {stats}")
         print(f"  datagen took {time.time() - datagen_start:.1f}s")
+    elif datagen_mode == "skip":
+        print("[0/3] skipping datagen, using existing data on volume...")
+        if not (data_dir / "memories.jsonl").exists():
+            return {"status": "error", "message": f"No data found at {data_dir}. Run datagen first."}
     else:
         import subprocess, time as time2, urllib.request
+
         print(f"[0/3] starting vllm server with {model}...")
-        proc = subprocess.Popen([
-            "python", "-m", "vllm.entrypoints.openai.api_server",
-            "--model", model, "--max-model-len", "8192",
-            "--gpu-memory-utilization", "0.9", "--port", "8000",
-        ])
+        proc = subprocess.Popen(
+            [
+                "python",
+                "-m",
+                "vllm.entrypoints.openai.api_server",
+                "--model",
+                model,
+                "--max-model-len",
+                "8192",
+                "--gpu-memory-utilization",
+                "0.9",
+                "--port",
+                "8000",
+            ]
+        )
         for attempt in range(120):
             time2.sleep(1)
             try:
@@ -239,9 +275,12 @@ def train_all_remote(
             import asyncio
             from engram.config import DataGenConfig
             from engram.training.datagen import generate_llm_dataset
+
             config_dg = DataGenConfig(
-                llm_provider="vllm", llm_model=model,
-                num_synthetic_users=num_users, output_dir=data_dir,
+                llm_provider="vllm",
+                llm_model=model,
+                num_synthetic_users=num_users,
+                output_dir=data_dir,
                 vllm_url="http://localhost:8000/v1",
             )
             datagen_start = time.time()
@@ -253,19 +292,26 @@ def train_all_remote(
 
     print()
     config = dev_config() if dev else EngramConfig()
-    config.training.output_dir = Path("/workspace/outputs")
+    config.training.output_dir = Path("/runpod-volume/outputs")
     config.training.device = "cuda" if torch.cuda.is_available() else "cpu"
 
     gpu_name = torch.cuda.get_device_name(0) if torch.cuda.is_available() else "cpu"
 
     print(f"config: backbone={config.encoder.backbone}")
-    print(f"  encoder: {config.training.encoder_epochs} epochs, batch {config.training.encoder_batch_size}, lr {config.training.encoder_lr}")
-    print(f"  edge clf: {config.training.edge_epochs} epochs, batch {config.training.edge_batch_size}, lr {config.training.edge_lr}")
-    print(f"  synthesis: {config.training.synthesis_epochs} epochs, batch {config.training.synthesis_batch_size}, lr {config.training.synthesis_lr}")
+    print(
+        f"  encoder: {config.training.encoder_epochs} epochs, batch {config.training.encoder_batch_size}, lr {config.training.encoder_lr}"
+    )
+    print(
+        f"  edge clf: {config.training.edge_epochs} epochs, batch {config.training.edge_batch_size}, lr {config.training.edge_lr}"
+    )
+    print(
+        f"  synthesis: {config.training.synthesis_epochs} epochs, batch {config.training.synthesis_batch_size}, lr {config.training.synthesis_lr}"
+    )
     print()
 
     # verify data files exist
     import os as _os
+
     for fname in ["memories.jsonl", "edges.jsonl", "synthesis.jsonl"]:
         fpath = data_dir / fname
         fsize = _os.path.getsize(fpath) if fpath.exists() else -1
@@ -279,8 +325,14 @@ def train_all_remote(
         encoder = train_encoder(config, data_dir)
     except Exception as e:
         import traceback
+
         traceback.print_exc()
-        return {"status": "error", "phase": "encoder", "error": str(e), "traceback": traceback.format_exc()}
+        return {
+            "status": "error",
+            "phase": "encoder",
+            "error": str(e),
+            "traceback": traceback.format_exc(),
+        }
     phase1_time = time.time() - phase1_start
     print(f"  phase 1 total: {phase1_time:.1f}s ({phase1_time/60:.1f}min)")
     print()
@@ -293,8 +345,14 @@ def train_all_remote(
         train_edge_classifier(config, data_dir, encoder=encoder)
     except Exception as e:
         import traceback
+
         traceback.print_exc()
-        return {"status": "error", "phase": "edge_classifier", "error": str(e), "traceback": traceback.format_exc()}
+        return {
+            "status": "error",
+            "phase": "edge_classifier",
+            "error": str(e),
+            "traceback": traceback.format_exc(),
+        }
     phase2_time = time.time() - phase2_start
     print(f"  phase 2 total: {phase2_time:.1f}s ({phase2_time/60:.1f}min)")
     print()
@@ -307,8 +365,14 @@ def train_all_remote(
         train_synthesis(config, data_dir, encoder=encoder)
     except Exception as e:
         import traceback
+
         traceback.print_exc()
-        return {"status": "error", "phase": "synthesis", "error": str(e), "traceback": traceback.format_exc()}
+        return {
+            "status": "error",
+            "phase": "synthesis",
+            "error": str(e),
+            "traceback": traceback.format_exc(),
+        }
     phase3_time = time.time() - phase3_start
     print(f"  phase 3 total: {phase3_time:.1f}s ({phase3_time/60:.1f}min)")
     print()
@@ -326,7 +390,7 @@ def train_all_remote(
     return {
         "status": "ok",
         "gpu": gpu_name,
-        "output_path": "/workspace/outputs",
+        "output_path": "/runpod-volume/outputs",
         "total_time_s": round(total_time, 1),
         "phase_times_s": {
             "encoder": round(phase1_time, 1),
@@ -355,6 +419,7 @@ def train_phase_remote(
     """run a single training phase on gpu."""
     import subprocess, os, sys
     import shutil
+
     engram_dir = "/workspace/engram"
     if os.path.exists(engram_dir):
         shutil.rmtree(engram_dir)
@@ -368,9 +433,9 @@ def train_phase_remote(
     from engram.config import EngramConfig, dev_config
 
     config = dev_config() if dev else EngramConfig()
-    config.training.output_dir = Path("/workspace/outputs")
+    config.training.output_dir = Path("/runpod-volume/outputs")
     config.training.device = "cuda" if torch.cuda.is_available() else "cpu"
-    data_dir = Path("/workspace/data")
+    data_dir = Path("/runpod-volume/data")
 
     gpu_name = torch.cuda.get_device_name(0) if torch.cuda.is_available() else "cpu"
 
@@ -403,7 +468,7 @@ async def main():
         choices=["all", "encoder", "edge", "synthesis", "datagen"],
         default="all",
     )
-    parser.add_argument("--datagen-mode", choices=["demo", "llm"], default="demo")
+    parser.add_argument("--datagen-mode", choices=["demo", "llm", "skip"], default="demo")
     parser.add_argument("--num-users", type=int, default=100)
     parser.add_argument(
         "--model",
