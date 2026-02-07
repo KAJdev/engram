@@ -1,0 +1,38 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "engram"
+version = "0.1.0"
+description = "Write-time relational memory retrieval for LLMs"
+requires-python = ">=3.10"
+dependencies = [
+    "torch>=2.1",
+    "transformers>=4.36",
+    "faiss-cpu>=1.7",
+    "networkx>=3.2",
+    "numpy>=1.24",
+    "scikit-learn>=1.3",
+    "tqdm>=4.65",
+    "pyyaml>=6.0",
+    "leidenalg>=0.10",
+    "igraph>=0.11",
+    "runpod-flash>=1.0.0",
+]
+
+[project.optional-dependencies]
+gpu = ["faiss-gpu>=1.7"]
+datagen = ["anthropic>=0.39", "openai>=1.0"]
+runpod = ["runpod-flash"]
+vllm = ["vllm>=0.6"]
+dev = ["pytest>=7.0", "ruff>=0.1"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+]
