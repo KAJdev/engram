@@ -102,6 +102,10 @@ def generate_data_remote(
     import subprocess, os, sys
     import shutil
 
+    # triton needs gcc for kernel compilation
+    subprocess.run(["apt-get", "update", "-qq"], check=False)
+    subprocess.run(["apt-get", "install", "-y", "-qq", "gcc"], check=True)
+
     engram_dir = "/workspace/engram"
     if os.path.exists(engram_dir):
         shutil.rmtree(engram_dir)
@@ -200,6 +204,10 @@ def train_all_remote(
     """generate data and run all three training phases on gpu."""
     import subprocess, os, sys
     import shutil
+
+    # triton needs gcc for kernel compilation
+    subprocess.run(["apt-get", "update", "-qq"], check=False)
+    subprocess.run(["apt-get", "install", "-y", "-qq", "gcc"], check=True)
 
     engram_dir = "/workspace/engram"
     if os.path.exists(engram_dir):
