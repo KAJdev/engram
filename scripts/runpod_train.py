@@ -25,7 +25,7 @@ REPO_BRANCH = "main"
 # gpu config for training
 train_gpu = LiveServerless(
     name="engram-train",
-    gpus=[GpuGroup.AMPERE_80, GpuGroup.HOPPER_141],
+    gpus=[GpuGroup("BLACKWELL_180")],
     workersMax=1,
     template=PodTemplate(
         containerDiskInGb=100,
@@ -36,7 +36,7 @@ train_gpu = LiveServerless(
 # gpu for datagen with open source llm via vllm
 datagen_gpu = LiveServerless(
     name="engram-datagen",
-    gpus=[GpuGroup.AMPERE_80, GpuGroup.HOPPER_141],
+    gpus=[GpuGroup("BLACKWELL_180")],
     workersMax=1,
     template=PodTemplate(
         containerDiskInGb=100,
