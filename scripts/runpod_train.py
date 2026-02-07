@@ -25,7 +25,7 @@ REPO_BRANCH = "main"
 # gpu config for training
 train_gpu = LiveServerless(
     name="engram-train",
-    gpus=[GpuGroup.AMPERE_80],
+    gpus=[GpuGroup.AMPERE_80, GpuGroup(141)],
     workersMax=1,
     template=PodTemplate(
         containerDiskInGb=100,
@@ -36,7 +36,7 @@ train_gpu = LiveServerless(
 # gpu for datagen with open source llm via vllm
 datagen_gpu = LiveServerless(
     name="engram-datagen",
-    gpus=[GpuGroup.AMPERE_80],
+    gpus=[GpuGroup.AMPERE_80, GpuGroup(141)],
     workersMax=1,
     template=PodTemplate(
         containerDiskInGb=100,
@@ -70,11 +70,13 @@ def generate_data_remote(
     repo_url: str = "https://github.com/kajdev/engram.git",
 ):
     """generate training data on a gpu worker."""
-    import subprocess, os
+    import subprocess, os, sys
     engram_dir = "/workspace/engram"
     if not os.path.exists(engram_dir):
         subprocess.run(["git", "clone", "-b", "main", repo_url, engram_dir], check=True)
     subprocess.run(["pip", "install", "-e", engram_dir], check=True, cwd=engram_dir)
+    if engram_dir not in sys.path:
+        sys.path.insert(0, engram_dir)
 
     from pathlib import Path
 
@@ -161,11 +163,13 @@ def train_all_remote(
     repo_url: str = "https://github.com/kajdev/engram.git",
 ):
     """generate data and run all three training phases on gpu."""
-    import subprocess, os
+    import subprocess, os, sys
     engram_dir = "/workspace/engram"
     if not os.path.exists(engram_dir):
         subprocess.run(["git", "clone", "-b", "main", repo_url, engram_dir], check=True)
     subprocess.run(["pip", "install", "-e", engram_dir], check=True, cwd=engram_dir)
+    if engram_dir not in sys.path:
+        sys.path.insert(0, engram_dir)
 
     import torch
     from pathlib import Path
@@ -256,11 +260,13 @@ def train_phase_remote(
     repo_url: str = "https://github.com/kajdev/engram.git",
 ):
     """run a single training phase on gpu."""
-    import subprocess, os
+    import subprocess, os, sys
     engram_dir = "/workspace/engram"
     if not os.path.exists(engram_dir):
         subprocess.run(["git", "clone", "-b", "main", repo_url, engram_dir], check=True)
     subprocess.run(["pip", "install", "-e", engram_dir], check=True, cwd=engram_dir)
+    if engram_dir not in sys.path:
+        sys.path.insert(0, engram_dir)
 
     import torch
     from pathlib import Path
