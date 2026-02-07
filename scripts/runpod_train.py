@@ -182,7 +182,7 @@ def generate_data_remote(
         return {"status": "error", "message": "vLLM server failed to start after 10min"}
 
     try:
-        import asyncio
+        import asyncio, threading
         from engram.config import DataGenConfig
         from engram.training.datagen import generate_llm_dataset
 
@@ -193,7 +193,20 @@ def generate_data_remote(
             output_dir=data_dir,
             vllm_url="http://localhost:8000/v1",
         )
-        stats = asyncio.run(generate_llm_dataset(config))
+        # run in a thread to avoid "can't call asyncio.run from running event loop"
+        _result = [None]
+        _exc = [None]
+        def _run():
+            try:
+                _result[0] = asyncio.run(generate_llm_dataset(config))
+            except Exception as e:
+                _exc[0] = e
+        t2 = threading.Thread(target=_run)
+        t2.start()
+        t2.join()
+        if _exc[0]:
+            raise _exc[0]
+        stats = _result[0]
         return {"status": "ok", "mode": "llm", "model": model, "stats": stats}
     finally:
         proc.terminate()
@@ -350,7 +363,20 @@ def train_all_remote(
                 vllm_url="http://localhost:8000/v1",
             )
             datagen_start = time.time()
-            stats = asyncio.run(generate_llm_dataset(config_dg))
+            # run in a thread to avoid "can't call asyncio.run from running event loop"
+            _result = [None]
+            _exc = [None]
+            def _run_datagen():
+                try:
+                    _result[0] = asyncio.run(generate_llm_dataset(config_dg))
+                except Exception as e:
+                    _exc[0] = e
+            t2 = threading.Thread(target=_run_datagen)
+            t2.start()
+            t2.join()
+            if _exc[0]:
+                raise _exc[0]
+            stats = _result[0]
             print(f"  {stats}")
             print(f"  datagen took {time.time() - datagen_start:.1f}s")
         finally:
