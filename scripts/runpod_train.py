@@ -149,15 +149,23 @@ def generate_data_remote(
     # wait for server (up to 30 min for first-time model download)
     import urllib.request, threading
 
-    # stream vllm output in background so we see progress/errors
+    # stream vllm output in background, detect fatal errors
+    _fatal_errors = []
+    _FATAL_PATTERNS = ["RuntimeError:", "CUDA error", "torch.AcceleratorError", "OutOfMemoryError", "Failed to find C compiler"]
     def _stream_output(p):
         for line in iter(p.stdout.readline, b""):
-            print(f"  [vllm] {line.decode(errors='replace').rstrip()}")
+            text = line.decode(errors="replace").rstrip()
+            print(f"  [vllm] {text}")
+            if any(pat in text for pat in _FATAL_PATTERNS):
+                _fatal_errors.append(text)
     t = threading.Thread(target=_stream_output, args=(proc,), daemon=True)
     t.start()
 
     for attempt in range(600):
         time.sleep(1)
+        if _fatal_errors:
+            proc.terminate()
+            return {"status": "error", "message": f"vLLM fatal error: {_fatal_errors[0]}"}
         if proc.poll() is not None:
             t.join(timeout=5)
             return {"status": "error", "message": f"vLLM process died with code {proc.returncode}"}
@@ -293,14 +301,22 @@ def train_all_remote(
             stderr=subprocess.STDOUT,
         )
 
+        _fatal_errors = []
+        _FATAL_PATTERNS = ["RuntimeError:", "CUDA error", "torch.AcceleratorError", "OutOfMemoryError", "Failed to find C compiler"]
         def _stream_output(p):
             for line in iter(p.stdout.readline, b""):
-                print(f"  [vllm] {line.decode(errors='replace').rstrip()}")
+                text = line.decode(errors="replace").rstrip()
+                print(f"  [vllm] {text}")
+                if any(pat in text for pat in _FATAL_PATTERNS):
+                    _fatal_errors.append(text)
         t = threading.Thread(target=_stream_output, args=(proc,), daemon=True)
         t.start()
 
         for attempt in range(600):
             time2.sleep(1)
+            if _fatal_errors:
+                proc.terminate()
+                return {"status": "error", "message": f"vLLM fatal error: {_fatal_errors[0]}"}
             if proc.poll() is not None:
                 t.join(timeout=5)
                 return {"status": "error", "message": f"vLLM process died with code {proc.returncode}"}
