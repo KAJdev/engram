@@ -128,7 +128,6 @@ def generate_data_remote(
     import subprocess, time
 
     print(f"Starting vLLM server with {model}...")
-    vllm_env = {**os.environ, "VLLM_ATTENTION_BACKEND": "FLASH_ATTN"}
     proc = subprocess.Popen(
         [
             "python",
@@ -142,10 +141,11 @@ def generate_data_remote(
             "0.9",
             "--port",
             "8000",
+            "--attention-config.backend",
+            "FLASH_ATTN",
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
-        env=vllm_env,
     )
 
     # wait for server (up to 30 min for first-time model download)
@@ -285,7 +285,6 @@ def train_all_remote(
 
         print(f"[0/3] starting vllm server with {model}...")
         import threading
-        vllm_env = {**os.environ, "VLLM_ATTENTION_BACKEND": "FLASH_ATTN"}
         proc = subprocess.Popen(
             [
                 "python",
@@ -299,10 +298,11 @@ def train_all_remote(
                 "0.9",
                 "--port",
                 "8000",
+                "--attention-config.backend",
+                "FLASH_ATTN",
             ],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-            env=vllm_env,
         )
 
         _fatal_errors = []
