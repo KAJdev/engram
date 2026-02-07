@@ -32,6 +32,7 @@ def _gpu_mem() -> str:
 
 
 def train_encoder(config: EngramConfig, data_dir: Path) -> MultiHeadEncoder:
+    print("  [train_encoder v2] starting")
     device = torch.device(config.training.device)
     tc = config.training
 
@@ -77,14 +78,23 @@ def train_encoder(config: EngramConfig, data_dir: Path) -> MultiHeadEncoder:
     backbone_params = list(encoder.backbone.parameters())
     head_params = [p for n, p in encoder.named_parameters() if "backbone" not in n]
     loss_params = list(criterion.parameters())
+    print(f"  param groups: backbone={len(backbone_params)}, heads={len(head_params)}, loss={len(loss_params)}")
 
-    optimizer = AdamW([
-        {"params": backbone_params, "lr": tc.encoder_backbone_lr},
-        {"params": head_params, "lr": tc.encoder_lr},
-        {"params": loss_params, "lr": tc.encoder_lr},
-    ], weight_decay=0.01)
+    print("  creating optimizer...")
+    optimizer = AdamW(
+        [
+            {"params": backbone_params, "lr": tc.encoder_backbone_lr},
+            {"params": head_params, "lr": tc.encoder_lr},
+            {"params": loss_params, "lr": tc.encoder_lr},
+        ],
+        weight_decay=0.01,
+    )
+    print("  optimizer created")
 
-    scheduler = CosineAnnealingLR(optimizer, T_max=max(1, tc.encoder_epochs * len(primary_loader)))
+    t_max = max(1, tc.encoder_epochs * len(primary_loader))
+    print(f"  creating scheduler with T_max={t_max}")
+    scheduler = CosineAnnealingLR(optimizer, T_max=t_max)
+    print("  scheduler created")
 
     best_loss = float("inf")
     save_dir = tc.output_dir / "encoder"
