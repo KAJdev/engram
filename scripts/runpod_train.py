@@ -19,13 +19,21 @@ from pathlib import Path
 
 from runpod_flash import remote, LiveServerless, GpuGroup, PodTemplate
 
+# sdk doesnt have blackwell yet, monkey patch it in
+GpuGroup._value2member_map_["BLACKWELL_180"] = None
+BLACKWELL_180 = object.__new__(GpuGroup)
+BLACKWELL_180._name_ = "BLACKWELL_180"
+BLACKWELL_180._value_ = "BLACKWELL_180"
+GpuGroup._value2member_map_["BLACKWELL_180"] = BLACKWELL_180
+GpuGroup._member_map_["BLACKWELL_180"] = BLACKWELL_180
+
 REPO_URL = "https://github.com/kajdev/engram.git"
 REPO_BRANCH = "main"
 
 # gpu config for training
 train_gpu = LiveServerless(
     name="engram-train",
-    gpus=[GpuGroup("BLACKWELL_180")],
+    gpus=[BLACKWELL_180],
     workersMax=1,
     template=PodTemplate(
         containerDiskInGb=100,
@@ -36,7 +44,7 @@ train_gpu = LiveServerless(
 # gpu for datagen with open source llm via vllm
 datagen_gpu = LiveServerless(
     name="engram-datagen",
-    gpus=[GpuGroup("BLACKWELL_180")],
+    gpus=[BLACKWELL_180],
     workersMax=1,
     template=PodTemplate(
         containerDiskInGb=100,
