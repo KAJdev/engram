@@ -88,7 +88,7 @@ def _install_engram(repo_url: str = REPO_URL, branch: str = REPO_BRANCH):
 def generate_data_remote(
     mode: str = "demo",
     num_users: int = 100,
-    model: str = "Qwen/Qwen2.5-72B-Instruct-AWQ",
+    model: str = "Qwen/Qwen2.5-72B-Instruct",
     repo_url: str = "https://github.com/kajdev/engram.git",
 ):
     """generate training data on a gpu worker."""
@@ -192,7 +192,7 @@ def train_all_remote(
     dev: bool = False,
     datagen_mode: str = "demo",
     num_users: int = 100,
-    model: str = "Qwen/Qwen2.5-72B-Instruct-AWQ",
+    model: str = "Qwen/Qwen2.5-72B-Instruct",
     repo_url: str = "https://github.com/kajdev/engram.git",
 ):
     """generate data and run all three training phases on gpu."""
@@ -485,9 +485,9 @@ async def main():
     parser.add_argument(
         "--model",
         type=str,
-        default="Qwen/Qwen2.5-72B-Instruct-AWQ",
+        default="Qwen/Qwen2.5-72B-Instruct",
         help="HuggingFace model for vLLM data generation. "
-        "Options: Qwen/Qwen2.5-72B-Instruct-AWQ, "
+        "Options: Qwen/Qwen2.5-72B-Instruct, "
         "meta-llama/Llama-4-Scout-17B-16E-Instruct",
     )
     parser.add_argument(
