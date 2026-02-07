@@ -306,7 +306,7 @@ def train_all_remote(
                 "--model",
                 model,
                 "--max-model-len",
-                "8192",
+                "32768",
                 "--gpu-memory-utilization",
                 "0.9",
                 "--port",
