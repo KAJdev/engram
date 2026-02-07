@@ -128,6 +128,7 @@ def generate_data_remote(
     import subprocess, time
 
     print(f"Starting vLLM server with {model}...")
+    vllm_env = {**os.environ, "VLLM_ATTENTION_BACKEND": "FLASH_ATTN"}
     proc = subprocess.Popen(
         [
             "python",
@@ -144,6 +145,7 @@ def generate_data_remote(
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
+        env=vllm_env,
     )
 
     # wait for server (up to 30 min for first-time model download)
@@ -151,7 +153,7 @@ def generate_data_remote(
 
     # stream vllm output in background, detect fatal errors
     _fatal_errors = []
-    _FATAL_PATTERNS = ["RuntimeError:", "CUDA error", "torch.AcceleratorError", "OutOfMemoryError", "Failed to find C compiler"]
+    _FATAL_PATTERNS = ["RuntimeError:", "CUDA error", "torch.AcceleratorError", "OutOfMemoryError", "Failed to find C compiler", "Could not find nvcc"]
     def _stream_output(p):
         for line in iter(p.stdout.readline, b""):
             text = line.decode(errors="replace").rstrip()
@@ -283,6 +285,7 @@ def train_all_remote(
 
         print(f"[0/3] starting vllm server with {model}...")
         import threading
+        vllm_env = {**os.environ, "VLLM_ATTENTION_BACKEND": "FLASH_ATTN"}
         proc = subprocess.Popen(
             [
                 "python",
@@ -299,10 +302,11 @@ def train_all_remote(
             ],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
+            env=vllm_env,
         )
 
         _fatal_errors = []
-        _FATAL_PATTERNS = ["RuntimeError:", "CUDA error", "torch.AcceleratorError", "OutOfMemoryError", "Failed to find C compiler"]
+        _FATAL_PATTERNS = ["RuntimeError:", "CUDA error", "torch.AcceleratorError", "OutOfMemoryError", "Failed to find C compiler", "Could not find nvcc"]
         def _stream_output(p):
             for line in iter(p.stdout.readline, b""):
                 text = line.decode(errors="replace").rstrip()
