@@ -151,9 +151,12 @@ def generate_data_remote(
 )
 def train_all_remote(
     dev: bool = False,
+    datagen_mode: str = "demo",
+    num_users: int = 100,
+    model: str = "openai/gpt-oss-120b",
     repo_url: str = REPO_URL,
 ):
-    """run all three training phases on gpu."""
+    """generate data and run all three training phases on gpu."""
     _install_engram(repo_url)
 
     import torch
@@ -163,21 +166,62 @@ def train_all_remote(
     from engram.training.train_edge_classifier import train_edge_classifier
     from engram.training.train_synthesis import train_synthesis
 
+    data_dir = Path("/workspace/data")
+
+    # generate data on the same worker
+    if datagen_mode == "demo":
+        from engram.training.datagen import generate_demo_dataset
+        print("[0/3] generating demo data...")
+        stats = generate_demo_dataset(data_dir, seed=42)
+        print(f"  {stats}")
+    else:
+        import subprocess, time, urllib.request
+        print(f"[0/3] starting vllm server with {model}...")
+        proc = subprocess.Popen([
+            "python", "-m", "vllm.entrypoints.openai.api_server",
+            "--model", model, "--max-model-len", "8192",
+            "--gpu-memory-utilization", "0.9", "--port", "8000",
+        ])
+        for attempt in range(120):
+            time.sleep(1)
+            try:
+                urllib.request.urlopen("http://localhost:8000/health")
+                print(f"  vllm ready after {attempt+1}s")
+                break
+            except Exception:
+                pass
+        else:
+            proc.terminate()
+            return {"status": "error", "message": "vllm server failed to start"}
+
+        try:
+            import asyncio
+            from engram.config import DataGenConfig
+            from engram.training.datagen import generate_llm_dataset
+            config_dg = DataGenConfig(
+                llm_provider="vllm", llm_model=model,
+                num_synthetic_users=num_users, output_dir=data_dir,
+                vllm_url="http://localhost:8000/v1",
+            )
+            stats = asyncio.run(generate_llm_dataset(config_dg))
+            print(f"  {stats}")
+        finally:
+            proc.terminate()
+
     config = dev_config() if dev else EngramConfig()
     config.training.output_dir = Path("/workspace/outputs")
     config.training.device = "cuda" if torch.cuda.is_available() else "cpu"
-    data_dir = Path("/workspace/data")
 
     gpu_name = torch.cuda.get_device_name(0) if torch.cuda.is_available() else "cpu"
-    print(f"Training on: {gpu_name}")
+    print(f"training on: {gpu_name}")
 
-    print("[1/3] Training encoder...")
+    print("[1/3] training encoder...")
     encoder = train_encoder(config, data_dir)
 
-    print("[2/3] Training edge classifier...")
+    print("[2/3] training edge classifier...")
     train_edge_classifier(config, data_dir, encoder=encoder)
 
-    print("[3/3] Training synthesis encoder...")
+    print("[3/3] training synthesis encoder...")
     train_synthesis(config, data_dir, encoder=encoder)
 
     return {
@@ -283,16 +327,15 @@ async def main():
         print(f"Result: {result}")
 
     elif args.phase == "all":
-        print("Running full pipeline: datagen → train (encoder → edge → synthesis)")
+        print("running full pipeline: datagen + train")
         print()
-
-        print("[Step 1] Generating demo data...")
-        data_result = await generate_data_remote(mode="demo", repo_url=args.repo_url)
-        print(f"  {data_result}")
-        print()
-
-        print("[Step 2] Training all models...")
-        train_result = await train_all_remote(dev=args.dev, repo_url=args.repo_url)
+        train_result = await train_all_remote(
+            dev=args.dev,
+            datagen_mode=args.datagen_mode,
+            num_users=args.num_users,
+            model=args.model,
+            repo_url=args.repo_url,
+        )
         print(f"  {train_result}")
 
     else:
