@@ -79,13 +79,11 @@ def generate_data_remote(
 ):
     """generate training data on a gpu worker."""
     import subprocess, os, sys
+    import shutil
     engram_dir = "/workspace/engram"
-    if not os.path.exists(engram_dir):
-        subprocess.run(["git", "clone", "-b", "main", repo_url, engram_dir], check=True)
-    else:
-        subprocess.run(["git", "pull", "origin", "main"], check=True, cwd=engram_dir)
-    # clear stale bytecode so python picks up updated source
-    subprocess.run("find /workspace/engram -name '__pycache__' -exec rm -rf {} + 2>/dev/null", shell=True, cwd=engram_dir)
+    if os.path.exists(engram_dir):
+        shutil.rmtree(engram_dir)
+    subprocess.run(["git", "clone", "-b", "main", repo_url, engram_dir], check=True)
     subprocess.run(["pip", "install", "-e", engram_dir], check=True, cwd=engram_dir)
     if engram_dir not in sys.path:
         sys.path.insert(0, engram_dir)
@@ -176,13 +174,11 @@ def train_all_remote(
 ):
     """generate data and run all three training phases on gpu."""
     import subprocess, os, sys
+    import shutil
     engram_dir = "/workspace/engram"
-    if not os.path.exists(engram_dir):
-        subprocess.run(["git", "clone", "-b", "main", repo_url, engram_dir], check=True)
-    else:
-        subprocess.run(["git", "pull", "origin", "main"], check=True, cwd=engram_dir)
-    # clear stale bytecode so python picks up updated source
-    subprocess.run("find /workspace/engram -name '__pycache__' -exec rm -rf {} + 2>/dev/null", shell=True, cwd=engram_dir)
+    if os.path.exists(engram_dir):
+        shutil.rmtree(engram_dir)
+    subprocess.run(["git", "clone", "-b", "main", repo_url, engram_dir], check=True)
     subprocess.run(["pip", "install", "-e", engram_dir], check=True, cwd=engram_dir)
     if engram_dir not in sys.path:
         sys.path.insert(0, engram_dir)
@@ -336,13 +332,11 @@ def train_phase_remote(
 ):
     """run a single training phase on gpu."""
     import subprocess, os, sys
+    import shutil
     engram_dir = "/workspace/engram"
-    if not os.path.exists(engram_dir):
-        subprocess.run(["git", "clone", "-b", "main", repo_url, engram_dir], check=True)
-    else:
-        subprocess.run(["git", "pull", "origin", "main"], check=True, cwd=engram_dir)
-    # clear stale bytecode so python picks up updated source
-    subprocess.run("find /workspace/engram -name '__pycache__' -exec rm -rf {} + 2>/dev/null", shell=True, cwd=engram_dir)
+    if os.path.exists(engram_dir):
+        shutil.rmtree(engram_dir)
+    subprocess.run(["git", "clone", "-b", "main", repo_url, engram_dir], check=True)
     subprocess.run(["pip", "install", "-e", engram_dir], check=True, cwd=engram_dir)
     if engram_dir not in sys.path:
         sys.path.insert(0, engram_dir)
