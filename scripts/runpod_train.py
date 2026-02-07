@@ -88,7 +88,7 @@ def _install_engram(repo_url: str = REPO_URL, branch: str = REPO_BRANCH):
 def generate_data_remote(
     mode: str = "demo",
     num_users: int = 100,
-    model: str = "openai/gpt-oss-120b",
+    model: str = "Qwen/Qwen2.5-72B-Instruct-AWQ",
     repo_url: str = "https://github.com/kajdev/engram.git",
 ):
     """generate training data on a gpu worker."""
@@ -115,6 +115,10 @@ def generate_data_remote(
 
     # llm mode: start vllm server, generate with open source model
     import subprocess, time
+    import os as _os
+
+    # cache models on network volume so they persist across runs
+    _os.environ["HF_HOME"] = "/runpod-volume/.cache/huggingface"
 
     print(f"Starting vLLM server with {model}...")
     proc = subprocess.Popen(
@@ -130,23 +134,25 @@ def generate_data_remote(
             "0.9",
             "--port",
             "8000",
-        ]
+        ],
+        env={**_os.environ, "HF_HOME": "/runpod-volume/.cache/huggingface"},
     )
 
-    # wait for server
+    # wait for server (up to 10 min for first-time model download)
     import urllib.request
 
-    for attempt in range(120):  # up to 2 min
+    for attempt in range(600):
         time.sleep(1)
         try:
             urllib.request.urlopen("http://localhost:8000/health")
             print(f"vLLM ready after {attempt+1}s")
             break
         except Exception:
-            pass
+            if attempt % 30 == 29:
+                print(f"  still waiting for vLLM... ({attempt+1}s)")
     else:
         proc.terminate()
-        return {"status": "error", "message": "vLLM server failed to start"}
+        return {"status": "error", "message": "vLLM server failed to start after 10min"}
 
     try:
         import asyncio
@@ -186,7 +192,7 @@ def train_all_remote(
     dev: bool = False,
     datagen_mode: str = "demo",
     num_users: int = 100,
-    model: str = "openai/gpt-oss-120b",
+    model: str = "Qwen/Qwen2.5-72B-Instruct-AWQ",
     repo_url: str = "https://github.com/kajdev/engram.git",
 ):
     """generate data and run all three training phases on gpu."""
@@ -242,6 +248,10 @@ def train_all_remote(
             return {"status": "error", "message": f"No data found at {data_dir}. Run datagen first."}
     else:
         import subprocess, time as time2, urllib.request
+        import os as _os2
+
+        # cache models on network volume
+        _os2.environ["HF_HOME"] = "/runpod-volume/.cache/huggingface"
 
         print(f"[0/3] starting vllm server with {model}...")
         proc = subprocess.Popen(
@@ -257,19 +267,21 @@ def train_all_remote(
                 "0.9",
                 "--port",
                 "8000",
-            ]
+            ],
+            env={**_os2.environ, "HF_HOME": "/runpod-volume/.cache/huggingface"},
         )
-        for attempt in range(120):
+        for attempt in range(600):  # up to 10 min for model download
             time2.sleep(1)
             try:
                 urllib.request.urlopen("http://localhost:8000/health")
                 print(f"  vllm ready after {attempt+1}s")
                 break
             except Exception:
-                pass
+                if attempt % 30 == 29:
+                    print(f"  still waiting for vLLM... ({attempt+1}s)")
         else:
             proc.terminate()
-            return {"status": "error", "message": "vllm server failed to start"}
+            return {"status": "error", "message": "vllm server failed to start after 10min"}
 
         try:
             import asyncio
@@ -473,11 +485,10 @@ async def main():
     parser.add_argument(
         "--model",
         type=str,
-        default="openai/gpt-oss-120b",
-        help="Open-source model for LLM data generation. "
-        "Options: openai/gpt-oss-120b, "
-        "meta-llama/Llama-4-Scout-17B-16E-Instruct, "
-        "Qwen/Qwen2.5-72B-Instruct-AWQ",
+        default="Qwen/Qwen2.5-72B-Instruct-AWQ",
+        help="HuggingFace model for vLLM data generation. "
+        "Options: Qwen/Qwen2.5-72B-Instruct-AWQ, "
+        "meta-llama/Llama-4-Scout-17B-16E-Instruct",
     )
     parser.add_argument(
         "--repo-url",
