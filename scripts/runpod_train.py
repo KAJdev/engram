@@ -47,7 +47,7 @@ REPO_URL = "https://github.com/kajdev/engram.git"
 REPO_BRANCH = "main"
 
 # persistent network volume for data + model weights
-engram_volume = NetworkVolume(name="engram-data", size=100)
+engram_volume = NetworkVolume(name="engram-data", size=200)
 
 # gpu config for training
 train_gpu = LiveServerless(
@@ -128,6 +128,7 @@ def generate_data_remote(
     import subprocess, time
 
     print(f"Starting vLLM server with {model}...")
+    import sys as _sys
     proc = subprocess.Popen(
         [
             "python",
@@ -142,23 +143,25 @@ def generate_data_remote(
             "--port",
             "8000",
         ],
+        stdout=_sys.stdout,
+        stderr=_sys.stderr,
     )
 
-    # wait for server (up to 10 min for first-time model download)
+    # wait for server (up to 30 min for first-time model download)
     import urllib.request
 
-    for attempt in range(600):
+    for attempt in range(1800):
         time.sleep(1)
         try:
             urllib.request.urlopen("http://localhost:8000/health")
             print(f"vLLM ready after {attempt+1}s")
             break
         except Exception:
-            if attempt % 30 == 29:
+            if attempt % 60 == 59:
                 print(f"  still waiting for vLLM... ({attempt+1}s)")
     else:
         proc.terminate()
-        return {"status": "error", "message": "vLLM server failed to start after 10min"}
+        return {"status": "error", "message": "vLLM server failed to start after 30min"}
 
     try:
         import asyncio
@@ -263,6 +266,7 @@ def train_all_remote(
         import subprocess, time as time2, urllib.request
 
         print(f"[0/3] starting vllm server with {model}...")
+        import sys as _sys
         proc = subprocess.Popen(
             [
                 "python",
@@ -277,21 +281,23 @@ def train_all_remote(
                 "--port",
                 "8000",
             ],
+            stdout=_sys.stdout,
+            stderr=_sys.stderr,
         )
-        for attempt in range(600):  # up to 10 min for model download
+        for attempt in range(1800):  # up to 30 min for model download
             time2.sleep(1)
             try:
                 urllib.request.urlopen("http://localhost:8000/health")
                 print(f"  vllm ready after {attempt+1}s")
                 break
             except Exception:
-                if attempt % 30 == 29:
+                if attempt % 60 == 59:
                     print(f"  still waiting for vLLM... ({attempt+1}s)")
         else:
             proc.terminate()
             return {
                 "status": "error",
-                "message": "vllm server failed to start after 10min",
+                "message": "vllm server failed to start after 30min",
             }
 
         try:
