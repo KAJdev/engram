@@ -67,10 +67,14 @@ def generate_data_remote(
     mode: str = "demo",
     num_users: int = 100,
     model: str = "openai/gpt-oss-120b",
-    repo_url: str = REPO_URL,
+    repo_url: str = "https://github.com/kajdev/engram.git",
 ):
     """generate training data on a gpu worker."""
-    _install_engram(repo_url)
+    import subprocess, os
+    engram_dir = "/workspace/engram"
+    if not os.path.exists(engram_dir):
+        subprocess.run(["git", "clone", "-b", "main", repo_url, engram_dir], check=True)
+    subprocess.run(["pip", "install", "-e", engram_dir], check=True, cwd=engram_dir)
 
     from pathlib import Path
 
@@ -154,10 +158,14 @@ def train_all_remote(
     datagen_mode: str = "demo",
     num_users: int = 100,
     model: str = "openai/gpt-oss-120b",
-    repo_url: str = REPO_URL,
+    repo_url: str = "https://github.com/kajdev/engram.git",
 ):
     """generate data and run all three training phases on gpu."""
-    _install_engram(repo_url)
+    import subprocess, os
+    engram_dir = "/workspace/engram"
+    if not os.path.exists(engram_dir):
+        subprocess.run(["git", "clone", "-b", "main", repo_url, engram_dir], check=True)
+    subprocess.run(["pip", "install", "-e", engram_dir], check=True, cwd=engram_dir)
 
     import torch
     from pathlib import Path
@@ -245,10 +253,14 @@ def train_all_remote(
 def train_phase_remote(
     phase: str,
     dev: bool = False,
-    repo_url: str = REPO_URL,
+    repo_url: str = "https://github.com/kajdev/engram.git",
 ):
     """run a single training phase on gpu."""
-    _install_engram(repo_url)
+    import subprocess, os
+    engram_dir = "/workspace/engram"
+    if not os.path.exists(engram_dir):
+        subprocess.run(["git", "clone", "-b", "main", repo_url, engram_dir], check=True)
+    subprocess.run(["pip", "install", "-e", engram_dir], check=True, cwd=engram_dir)
 
     import torch
     from pathlib import Path
