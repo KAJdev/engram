@@ -264,11 +264,23 @@ def train_all_remote(
     print(f"  synthesis: {config.training.synthesis_epochs} epochs, batch {config.training.synthesis_batch_size}, lr {config.training.synthesis_lr}")
     print()
 
+    # verify data files exist
+    import os as _os
+    for fname in ["memories.jsonl", "edges.jsonl", "synthesis.jsonl"]:
+        fpath = data_dir / fname
+        fsize = _os.path.getsize(fpath) if fpath.exists() else -1
+        print(f"  {fname}: {'exists' if fpath.exists() else 'MISSING'} ({fsize} bytes)")
+
     print("=" * 60)
     print("[1/3] training encoder...")
     print("=" * 60)
     phase1_start = time.time()
-    encoder = train_encoder(config, data_dir)
+    try:
+        encoder = train_encoder(config, data_dir)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return {"status": "error", "phase": "encoder", "error": str(e), "traceback": traceback.format_exc()}
     phase1_time = time.time() - phase1_start
     print(f"  phase 1 total: {phase1_time:.1f}s ({phase1_time/60:.1f}min)")
     print()
@@ -277,7 +289,12 @@ def train_all_remote(
     print("[2/3] training edge classifier...")
     print("=" * 60)
     phase2_start = time.time()
-    train_edge_classifier(config, data_dir, encoder=encoder)
+    try:
+        train_edge_classifier(config, data_dir, encoder=encoder)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return {"status": "error", "phase": "edge_classifier", "error": str(e), "traceback": traceback.format_exc()}
     phase2_time = time.time() - phase2_start
     print(f"  phase 2 total: {phase2_time:.1f}s ({phase2_time/60:.1f}min)")
     print()
@@ -286,7 +303,12 @@ def train_all_remote(
     print("[3/3] training synthesis encoder...")
     print("=" * 60)
     phase3_start = time.time()
-    train_synthesis(config, data_dir, encoder=encoder)
+    try:
+        train_synthesis(config, data_dir, encoder=encoder)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return {"status": "error", "phase": "synthesis", "error": str(e), "traceback": traceback.format_exc()}
     phase3_time = time.time() - phase3_start
     print(f"  phase 3 total: {phase3_time:.1f}s ({phase3_time/60:.1f}min)")
     print()
