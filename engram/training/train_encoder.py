@@ -134,6 +134,9 @@ def train_encoder(config: EngramConfig, data_dir: Path) -> MultiHeadEncoder:
             )
 
         epoch_time = time.time() - epoch_start
+        if not epoch_losses:
+            print(f"  epoch {epoch+1}: no batches (dataset too small for batch size)")
+            continue
         avg_loss = sum(epoch_losses) / len(epoch_losses)
         lr_backbone = optimizer.param_groups[0]["lr"]
         lr_heads = optimizer.param_groups[1]["lr"]

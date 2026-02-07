@@ -136,6 +136,9 @@ def train_synthesis(
             pbar.set_postfix(loss=f"{loss.item():.4f}", grad=f"{grad_norm:.3f}")
 
         epoch_time = time.time() - epoch_start
+        if not epoch_losses:
+            print(f"  epoch {epoch+1}: no batches (dataset too small for batch size)")
+            continue
         avg_loss = sum(epoch_losses) / len(epoch_losses)
         lr_now = optimizer.param_groups[0]["lr"]
 

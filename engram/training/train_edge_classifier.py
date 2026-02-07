@@ -151,6 +151,9 @@ def train_edge_classifier(
             )
 
         epoch_time = time.time() - epoch_start
+        if not epoch_losses:
+            print(f"  epoch {epoch+1}: no batches (dataset too small for batch size)")
+            continue
         avg_loss = sum(epoch_losses) / len(epoch_losses)
         avg_exists = sum(exists_losses) / len(exists_losses) if exists_losses else 0
         avg_type = sum(type_losses) / len(type_losses) if type_losses else 0
