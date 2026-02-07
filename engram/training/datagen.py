@@ -437,7 +437,7 @@ async def generate_llm_dataset(config: DataGenConfig) -> dict:
         async def call_llm(prompt: str) -> str:
             resp = await client.chat.completions.create(
                 model=config.llm_model,
-                max_tokens=8192,
+                max_tokens=4096,
                 temperature=0.7,
                 messages=[{"role": "user", "content": prompt}],
             )
@@ -450,7 +450,7 @@ async def generate_llm_dataset(config: DataGenConfig) -> dict:
         async def call_llm(prompt: str) -> str:
             resp = await client.chat.completions.create(
                 model=config.llm_model,
-                max_tokens=8192,
+                max_tokens=4096,
                 messages=[{"role": "user", "content": prompt}],
             )
             return resp.choices[0].message.content
