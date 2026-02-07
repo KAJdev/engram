@@ -26,7 +26,14 @@ import argparse
 import asyncio
 from pathlib import Path
 
-from runpod_flash import remote, LiveServerless, GpuGroup, PodTemplate, NetworkVolume, DataCenter
+from runpod_flash import (
+    remote,
+    LiveServerless,
+    GpuGroup,
+    PodTemplate,
+    NetworkVolume,
+    DataCenter,
+)
 
 # sdk doesnt have blackwell yet, monkey patch it in
 GpuGroup._value2member_map_["BLACKWELL_180"] = None
@@ -49,7 +56,7 @@ train_gpu = LiveServerless(
     workersMax=3,
     workersMin=1,
     template=PodTemplate(
-        containerDiskInGb=200,
+        containerDiskInGb=500,
     ),
     networkVolume=engram_volume,
 )
@@ -61,7 +68,7 @@ datagen_gpu = LiveServerless(
     workersMax=3,
     workersMin=1,
     template=PodTemplate(
-        containerDiskInGb=200,
+        containerDiskInGb=500,
     ),
     networkVolume=engram_volume,
 )
@@ -240,7 +247,10 @@ def train_all_remote(
     elif datagen_mode == "skip":
         print("[0/3] skipping datagen, using existing data on volume...")
         if not (data_dir / "memories.jsonl").exists():
-            return {"status": "error", "message": f"No data found at {data_dir}. Run datagen first."}
+            return {
+                "status": "error",
+                "message": f"No data found at {data_dir}. Run datagen first.",
+            }
     else:
         import subprocess, time as time2, urllib.request
 
@@ -271,7 +281,10 @@ def train_all_remote(
                     print(f"  still waiting for vLLM... ({attempt+1}s)")
         else:
             proc.terminate()
-            return {"status": "error", "message": "vllm server failed to start after 10min"}
+            return {
+                "status": "error",
+                "message": "vllm server failed to start after 10min",
+            }
 
         try:
             import asyncio
@@ -470,7 +483,9 @@ async def main():
         choices=["all", "encoder", "edge", "synthesis", "datagen"],
         default="all",
     )
-    parser.add_argument("--datagen-mode", choices=["demo", "llm", "skip"], default="demo")
+    parser.add_argument(
+        "--datagen-mode", choices=["demo", "llm", "skip"], default="demo"
+    )
     parser.add_argument("--num-users", type=int, default=100)
     parser.add_argument(
         "--model",

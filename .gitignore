@@ -8,3 +8,4 @@ test_outputs/
 *.egg-info/
 .venv/
 .env
+.claude/settings.local.json
