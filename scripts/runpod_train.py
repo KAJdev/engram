@@ -47,7 +47,7 @@ REPO_URL = "https://github.com/kajdev/engram.git"
 REPO_BRANCH = "main"
 
 # persistent network volume for data + model weights
-engram_volume = NetworkVolume(name="engram-data", size=200)
+engram_volume = NetworkVolume(name="engram-data-v2", size=200)
 
 # gpu config for training
 train_gpu = LiveServerless(
@@ -128,7 +128,6 @@ def generate_data_remote(
     import subprocess, time
 
     print(f"Starting vLLM server with {model}...")
-    import sys as _sys
     proc = subprocess.Popen(
         [
             "python",
@@ -143,25 +142,34 @@ def generate_data_remote(
             "--port",
             "8000",
         ],
-        stdout=_sys.stdout,
-        stderr=_sys.stderr,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
     )
 
     # wait for server (up to 30 min for first-time model download)
-    import urllib.request
+    import urllib.request, threading
 
-    for attempt in range(1800):
+    # stream vllm output in background so we see progress/errors
+    def _stream_output(p):
+        for line in iter(p.stdout.readline, b""):
+            print(f"  [vllm] {line.decode(errors='replace').rstrip()}")
+    t = threading.Thread(target=_stream_output, args=(proc,), daemon=True)
+    t.start()
+
+    for attempt in range(600):
         time.sleep(1)
+        if proc.poll() is not None:
+            t.join(timeout=5)
+            return {"status": "error", "message": f"vLLM process died with code {proc.returncode}"}
         try:
             urllib.request.urlopen("http://localhost:8000/health")
             print(f"vLLM ready after {attempt+1}s")
             break
         except Exception:
-            if attempt % 60 == 59:
-                print(f"  still waiting for vLLM... ({attempt+1}s)")
+            pass
     else:
         proc.terminate()
-        return {"status": "error", "message": "vLLM server failed to start after 30min"}
+        return {"status": "error", "message": "vLLM server failed to start after 10min"}
 
     try:
         import asyncio
@@ -266,7 +274,7 @@ def train_all_remote(
         import subprocess, time as time2, urllib.request
 
         print(f"[0/3] starting vllm server with {model}...")
-        import sys as _sys
+        import threading
         proc = subprocess.Popen(
             [
                 "python",
@@ -281,23 +289,32 @@ def train_all_remote(
                 "--port",
                 "8000",
             ],
-            stdout=_sys.stdout,
-            stderr=_sys.stderr,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
         )
-        for attempt in range(1800):  # up to 30 min for model download
+
+        def _stream_output(p):
+            for line in iter(p.stdout.readline, b""):
+                print(f"  [vllm] {line.decode(errors='replace').rstrip()}")
+        t = threading.Thread(target=_stream_output, args=(proc,), daemon=True)
+        t.start()
+
+        for attempt in range(600):
             time2.sleep(1)
+            if proc.poll() is not None:
+                t.join(timeout=5)
+                return {"status": "error", "message": f"vLLM process died with code {proc.returncode}"}
             try:
                 urllib.request.urlopen("http://localhost:8000/health")
                 print(f"  vllm ready after {attempt+1}s")
                 break
             except Exception:
-                if attempt % 60 == 59:
-                    print(f"  still waiting for vLLM... ({attempt+1}s)")
+                pass
         else:
             proc.terminate()
             return {
                 "status": "error",
-                "message": "vllm server failed to start after 30min",
+                "message": "vllm server failed to start after 10min",
             }
 
         try:
