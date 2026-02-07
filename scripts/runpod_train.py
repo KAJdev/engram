@@ -49,7 +49,7 @@ train_gpu = LiveServerless(
     workersMax=3,
     workersMin=1,
     template=PodTemplate(
-        containerDiskInGb=100,
+        containerDiskInGb=200,
     ),
     networkVolume=engram_volume,
 )
@@ -61,7 +61,7 @@ datagen_gpu = LiveServerless(
     workersMax=3,
     workersMin=1,
     template=PodTemplate(
-        containerDiskInGb=100,
+        containerDiskInGb=200,
     ),
     networkVolume=engram_volume,
 )
@@ -115,10 +115,6 @@ def generate_data_remote(
 
     # llm mode: start vllm server, generate with open source model
     import subprocess, time
-    import os as _os
-
-    # cache models on network volume so they persist across runs
-    _os.environ["HF_HOME"] = "/runpod-volume/.cache/huggingface"
 
     print(f"Starting vLLM server with {model}...")
     proc = subprocess.Popen(
@@ -135,7 +131,6 @@ def generate_data_remote(
             "--port",
             "8000",
         ],
-        env={**_os.environ, "HF_HOME": "/runpod-volume/.cache/huggingface"},
     )
 
     # wait for server (up to 10 min for first-time model download)
@@ -248,10 +243,6 @@ def train_all_remote(
             return {"status": "error", "message": f"No data found at {data_dir}. Run datagen first."}
     else:
         import subprocess, time as time2, urllib.request
-        import os as _os2
-
-        # cache models on network volume
-        _os2.environ["HF_HOME"] = "/runpod-volume/.cache/huggingface"
 
         print(f"[0/3] starting vllm server with {model}...")
         proc = subprocess.Popen(
@@ -268,7 +259,6 @@ def train_all_remote(
                 "--port",
                 "8000",
             ],
-            env={**_os2.environ, "HF_HOME": "/runpod-volume/.cache/huggingface"},
         )
         for attempt in range(600):  # up to 10 min for model download
             time2.sleep(1)
