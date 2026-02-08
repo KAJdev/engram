@@ -34,6 +34,11 @@ if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
     exit 1
 }
 
+# free up disk before building (vllm base images are huge)
+Write-Host "pruning docker build cache..." -ForegroundColor Yellow
+docker builder prune -f 2>$null
+docker image prune -f 2>$null
+
 # build
 Write-Host "building image..." -ForegroundColor Yellow
 docker build `

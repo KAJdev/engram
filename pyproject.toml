@@ -24,7 +24,7 @@ dependencies = [
 
 [project.optional-dependencies]
 gpu = ["faiss-gpu>=1.7"]
-datagen = ["anthropic>=0.39", "openai>=1.0"]
+datagen = ["anthropic>=0.39", "openai>=1.0", "aiohttp>=3.9"]
 vllm = ["vllm>=0.6"]
 dev = ["pytest>=7.0", "ruff>=0.1"]
 

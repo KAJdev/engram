@@ -110,7 +110,9 @@ class DataGenConfig:
     queries_per_user: int = 30
     output_dir: Path = Path("./data")
     max_concurrent: int = 10
-    vllm_url: str = "http://localhost:8000/v1"
+    vllm_url: str = (
+        "http://localhost:8000"  # runpod: https://api.runpod.ai/v2/{endpoint_id}
+    )
     vllm_api_key: str = "not-needed"  # set to RUNPOD_API_KEY for runpod endpoints
 
 

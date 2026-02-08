@@ -5,7 +5,7 @@ for production data generation, first deploy a vllm endpoint:
 
 then generate data pointing at it:
     python scripts/generate_data.py --mode llm --provider vllm \\
-        --vllm-url https://api.runpod.ai/v2/YOUR_ENDPOINT_ID/openai/v1 \\
+        --vllm-url https://api.runpod.ai/v2/YOUR_ENDPOINT_ID \\
         --num-users 500
 """
 
@@ -44,8 +44,8 @@ def main():
     parser.add_argument(
         "--vllm-url",
         type=str,
-        default="http://localhost:8000/v1",
-        help="vllm/runpod endpoint url (openai compatible)",
+        default="http://localhost:8000",
+        help="runpod serverless endpoint base url (e.g. https://api.runpod.ai/v2/ENDPOINT_ID)",
     )
     parser.add_argument(
         "--vllm-api-key",

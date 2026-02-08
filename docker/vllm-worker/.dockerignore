@@ -1,0 +1,4 @@
+# only send handler.py as build context
+*
+!handler.py
+

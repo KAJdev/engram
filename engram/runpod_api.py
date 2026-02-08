@@ -263,8 +263,8 @@ class RunPodClient:
 
     @staticmethod
     def endpoint_openai_url(endpoint_id: str) -> str:
-        """get the openai-compatible base url for a serverless endpoint."""
-        return f"https://api.runpod.ai/v2/{endpoint_id}/openai/v1"
+        """get the base url for a serverless endpoint (used with /runsync handler)."""
+        return f"https://api.runpod.ai/v2/{endpoint_id}"
 
     # ── pods (single instance containers) ──────────────────────────────────
 

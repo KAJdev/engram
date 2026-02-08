@@ -985,23 +985,37 @@ async def generate_llm_dataset(config: DataGenConfig) -> dict:
             return resp.content[0].text
 
     elif config.llm_provider == "vllm":
-        # vllm serves an openai compatible api, use openai client with custom base_url
-        # works with local vllm servers and runpod serverless endpoints
-        from openai import AsyncOpenAI
+        # hit our runpod serverless handler via /runsync
+        # handler proxies openai-format requests to the local vllm server
+        import aiohttp
 
-        client = AsyncOpenAI(
-            base_url=config.vllm_url,
-            api_key=config.vllm_api_key,
-        )
+        runsync_url = config.vllm_url.rstrip("/") + "/runsync"
+        headers = {
+            "Authorization": f"Bearer {config.vllm_api_key}",
+            "Content-Type": "application/json",
+        }
 
         async def call_llm(prompt: str) -> str:
-            resp = await client.chat.completions.create(
-                model=config.llm_model,
-                max_tokens=4096,
-                temperature=0.7,
-                messages=[{"role": "user", "content": prompt}],
-            )
-            return resp.choices[0].message.content
+            payload = {
+                "input": {
+                    "model": config.llm_model,
+                    "messages": [{"role": "user", "content": prompt}],
+                    "max_tokens": 4096,
+                    "temperature": 0.7,
+                }
+            }
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    runsync_url, json=payload, headers=headers, timeout=aiohttp.ClientTimeout(total=300)
+                ) as resp:
+                    resp.raise_for_status()
+                    data = await resp.json()
+
+            # runpod runsync returns {"id": "...", "status": "COMPLETED", "output": {openai response}}
+            if data.get("status") != "COMPLETED":
+                raise RuntimeError(f"runpod job failed: {data.get('status')} — {data}")
+            output = data["output"]
+            return output["choices"][0]["message"]["content"]
 
     else:
         from openai import AsyncOpenAI

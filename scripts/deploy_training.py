@@ -32,6 +32,7 @@ import sys
 
 # load .env before anything else
 from pathlib import Path
+
 env_path = Path(__file__).parent.parent / ".env"
 if env_path.exists():
     for line in env_path.read_text().splitlines():
@@ -90,55 +91,61 @@ def _build_startup_script(
     # data generation phase (if vllm endpoint provided)
     if datagen_url:
         model = datagen_model or "meta-llama/Llama-3.3-70B-Instruct"
-        lines.extend([
-            "# generate training data via vllm endpoint",
-            f"echo 'generating training data ({num_users} users)...'",
-            f"export RUNPOD_API_KEY='{runpod_api_key}'",
-            f"python scripts/generate_data.py \\",
-            f"  --mode llm \\",
-            f"  --provider vllm \\",
-            f"  --vllm-url '{datagen_url}' \\",
-            f"  --model '{model}' \\",
-            f"  --num-users {num_users} \\",
-            f"  --output-dir /runpod-volume/data",
-            "",
-        ])
+        lines.extend(
+            [
+                "# generate training data via vllm endpoint",
+                f"echo 'generating training data ({num_users} users)...'",
+                f"export RUNPOD_API_KEY='{runpod_api_key}'",
+                f"python scripts/generate_data.py \\",
+                f"  --mode llm \\",
+                f"  --provider vllm \\",
+                f"  --vllm-url '{datagen_url}' \\",
+                f"  --model '{model}' \\",
+                f"  --num-users {num_users} \\",
+                f"  --output-dir /runpod-volume/data",
+                "",
+            ]
+        )
     else:
-        lines.extend([
-            "# check for existing data on network volume",
-            "if [ -f /runpod-volume/data/memories.jsonl ]; then",
-            "  echo 'found existing data on network volume'",
-            "  ls -la /runpod-volume/data/",
-            "else",
-            "  echo 'no data found, generating demo dataset...'",
-            "  python scripts/generate_data.py --mode demo --output-dir /runpod-volume/data",
-            "fi",
-            "",
-        ])
+        lines.extend(
+            [
+                "# check for existing data on network volume",
+                "if [ -f /runpod-volume/data/memories.jsonl ]; then",
+                "  echo 'found existing data on network volume'",
+                "  ls -la /runpod-volume/data/",
+                "else",
+                "  echo 'no data found, generating demo dataset...'",
+                "  python scripts/generate_data.py --mode demo --output-dir /runpod-volume/data",
+                "fi",
+                "",
+            ]
+        )
 
     # training phase
     dev_flag = "--dev" if dev else ""
-    lines.extend([
-        "# run training",
-        "echo '============================================'",
-        "echo 'STARTING TRAINING'",
-        "echo '============================================'",
-        f"python scripts/train.py \\",
-        f"  --data-dir /runpod-volume/data \\",
-        f"  --output-dir /runpod-volume/outputs \\",
-        f"  --device cuda \\",
-        f"  {dev_flag}",
-        "",
-        "echo '============================================'",
-        "echo 'TRAINING COMPLETE'",
-        "echo 'models saved to /runpod-volume/outputs/'",
-        "ls -la /runpod-volume/outputs/",
-        "echo '============================================'",
-        "",
-        "# keep pod alive for inspection (will auto-stop based on idle timeout)",
-        "echo 'pod staying alive for inspection. terminate when done.'",
-        "sleep infinity",
-    ])
+    lines.extend(
+        [
+            "# run training",
+            "echo '============================================'",
+            "echo 'STARTING TRAINING'",
+            "echo '============================================'",
+            f"python scripts/train.py \\",
+            f"  --data-dir /runpod-volume/data \\",
+            f"  --output-dir /runpod-volume/outputs \\",
+            f"  --device cuda \\",
+            f"  {dev_flag}",
+            "",
+            "echo '============================================'",
+            "echo 'TRAINING COMPLETE'",
+            "echo 'models saved to /runpod-volume/outputs/'",
+            "ls -la /runpod-volume/outputs/",
+            "echo '============================================'",
+            "",
+            "# keep pod alive for inspection (will auto-stop based on idle timeout)",
+            "echo 'pod staying alive for inspection. terminate when done.'",
+            "sleep infinity",
+        ]
+    )
 
     return "\n".join(lines)
 
@@ -164,7 +171,9 @@ def deploy(args):
         datacenter_id=VOLUME_DATACENTER,
     )
     volume_id = volume["id"]
-    print(f"  volume: {volume_id} ({volume['name']}, {volume['size']}GB, {volume['dataCenterId']})")
+    print(
+        f"  volume: {volume_id} ({volume['name']}, {volume['size']}GB, {volume['dataCenterId']})"
+    )
     print()
 
     # build startup script
@@ -223,7 +232,9 @@ def deploy(args):
         print(f"  pod id:     {pod_id}")
         for port_info in ports:
             if port_info.get("isIpPublic"):
-                print(f"  {port_info['privatePort']}/tcp:  {port_info['ip']}:{port_info['publicPort']}")
+                print(
+                    f"  {port_info['privatePort']}/tcp:  {port_info['ip']}:{port_info['publicPort']}"
+                )
         print()
         print("  to check status:")
         print(f"    python scripts/deploy_training.py --status {pod_id}")
@@ -235,7 +246,9 @@ def deploy(args):
         print("=" * 60)
     else:
         print(f"  pod {pod_id} is starting but not ready yet.")
-        print(f"  check status with: python scripts/deploy_training.py --status {pod_id}")
+        print(
+            f"  check status with: python scripts/deploy_training.py --status {pod_id}"
+        )
 
 
 def check_status(args):
@@ -251,7 +264,9 @@ def check_status(args):
         print(f"  uptime: {runtime.get('uptimeInSeconds', 0)}s")
         for port_info in runtime.get("ports", []):
             if port_info.get("isIpPublic"):
-                print(f"  {port_info['privatePort']}/tcp: {port_info['ip']}:{port_info['publicPort']}")
+                print(
+                    f"  {port_info['privatePort']}/tcp: {port_info['ip']}:{port_info['publicPort']}"
+                )
 
 
 def terminate(args):
@@ -268,28 +283,40 @@ def terminate(args):
 
 def main():
     parser = argparse.ArgumentParser(description="Deploy Engram training pod on RunPod")
-    parser.add_argument("--gpu", type=str, default=DEFAULT_GPU,
-                       help=f"gpu type. default: {DEFAULT_GPU}")
-    parser.add_argument("--dev", action="store_true",
-                       help="dev mode: small model, few epochs")
+    parser.add_argument(
+        "--gpu", type=str, default=DEFAULT_GPU, help=f"gpu type. default: {DEFAULT_GPU}"
+    )
+    parser.add_argument(
+        "--dev", action="store_true", help="dev mode: small model, few epochs"
+    )
     parser.add_argument("--repo-url", type=str, default=REPO_URL)
     parser.add_argument("--branch", type=str, default=REPO_BRANCH)
 
     # datagen on the pod
-    parser.add_argument("--datagen-url", type=str, default=None,
-                       help="vllm endpoint url for data generation on the pod")
-    parser.add_argument("--datagen-model", type=str, default=None,
-                       help="model name for datagen")
-    parser.add_argument("--num-users", type=int, default=500,
-                       help="number of synthetic users to generate")
+    parser.add_argument(
+        "--datagen-url",
+        type=str,
+        default=None,
+        help="runpod serverless endpoint url for datagen (e.g. https://api.runpod.ai/v2/ENDPOINT_ID)",
+    )
+    parser.add_argument(
+        "--datagen-model", type=str, default=None, help="model name for datagen"
+    )
+    parser.add_argument(
+        "--num-users",
+        type=int,
+        default=500,
+        help="number of synthetic users to generate",
+    )
 
     # management
-    parser.add_argument("--status", type=str, metavar="POD_ID",
-                       help="check pod status")
-    parser.add_argument("--terminate", type=str, metavar="POD_ID",
-                       help="terminate a pod")
-    parser.add_argument("--list-volumes", action="store_true",
-                       help="list network volumes")
+    parser.add_argument("--status", type=str, metavar="POD_ID", help="check pod status")
+    parser.add_argument(
+        "--terminate", type=str, metavar="POD_ID", help="terminate a pod"
+    )
+    parser.add_argument(
+        "--list-volumes", action="store_true", help="list network volumes"
+    )
 
     args = parser.parse_args()
 
@@ -301,11 +328,12 @@ def main():
         client = RunPodClient()
         volumes = client.get_network_volumes()
         for vol in volumes:
-            print(f"  {vol['id']}: {vol['name']} ({vol['size']}GB, {vol['dataCenterId']})")
+            print(
+                f"  {vol['id']}: {vol['name']} ({vol['size']}GB, {vol['dataCenterId']})"
+            )
     else:
         deploy(args)
 
 
 if __name__ == "__main__":
     main()
-

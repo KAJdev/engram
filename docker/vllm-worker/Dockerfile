@@ -18,13 +18,15 @@
 ARG BASE_IMAGE=vllm/vllm-openai:gptoss
 FROM ${BASE_IMAGE}
 
-# install runpod sdk and requests for the handler
-RUN pip install --no-cache-dir runpod requests
+# install runpod sdk and requests, nuke every cache in the same layer
+RUN pip install --no-cache-dir runpod requests \
+  && rm -rf /root/.cache /tmp/* /var/tmp/* \
+  && find /usr/lib/python3* /usr/local/lib/python3* -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 
 # copy our serverless handler
 COPY handler.py /handler.py
 
-# vllm openai server listens here, runpod proxies /openai/v1 to it
+# vllm openai server listens here
 EXPOSE 8000
 
 # override the base image entrypoint - our handler manages vllm lifecycle
