@@ -39,18 +39,24 @@ STARTUP_TIMEOUT = int(os.environ.get("STARTUP_TIMEOUT", "900"))
 
 # ── vllm lifecycle ───────────────────────────────────────────────────
 
+
 def build_vllm_cmd() -> list[str]:
-    """build the vllm server command from env vars."""
+    """build the vllm serve command from env vars."""
     if not MODEL_NAME:
         raise RuntimeError("MODEL_NAME env var is required")
 
     cmd = [
-        "python", "-m", "vllm.entrypoints.openai.api_server",
-        "--model", MODEL_NAME,
-        "--host", "0.0.0.0",
-        "--port", str(VLLM_PORT),
-        "--max-model-len", MAX_MODEL_LEN,
-        "--gpu-memory-utilization", GPU_MEM_UTIL,
+        "vllm",
+        "serve",
+        MODEL_NAME,
+        "--host",
+        "0.0.0.0",
+        "--port",
+        str(VLLM_PORT),
+        "--max-model-len",
+        MAX_MODEL_LEN,
+        "--gpu-memory-utilization",
+        GPU_MEM_UTIL,
         "--trust-remote-code",
     ]
 
@@ -116,6 +122,7 @@ print("[handler] worker ready, registering handler")
 
 # ── runpod handler ───────────────────────────────────────────────────
 
+
 def handler(job):
     """proxy incoming runpod requests to the local vllm server.
 
@@ -125,7 +132,7 @@ def handler(job):
     example input:
         {
             "openai_route": "/v1/chat/completions",
-            "model": "gpt-oss-120b",
+            "model": "Qwen/Qwen2.5-72B-Instruct",
             "messages": [{"role": "user", "content": "hello"}],
             "max_tokens": 512
         }
@@ -154,4 +161,3 @@ def handler(job):
 # ── register and start ───────────────────────────────────────────────
 
 runpod.serverless.start({"handler": handler})
-

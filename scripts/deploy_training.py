@@ -90,7 +90,7 @@ def _build_startup_script(
 
     # data generation phase (if vllm endpoint provided)
     if datagen_url:
-        model = datagen_model or "meta-llama/Llama-3.3-70B-Instruct"
+        model = datagen_model or "Qwen/Qwen2.5-72B-Instruct"
         lines.extend(
             [
                 "# generate training data via vllm endpoint",

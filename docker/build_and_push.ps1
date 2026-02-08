@@ -3,7 +3,6 @@
 # usage:
 #   .\docker\build_and_push.ps1 -DockerUser yourusername
 #   .\docker\build_and_push.ps1 -DockerUser yourusername -Tag v1.0
-#   .\docker\build_and_push.ps1 -DockerUser yourusername -BaseImage "vllm/vllm-openai:gptoss"
 
 param(
     [Parameter(Mandatory=$true)]
@@ -11,9 +10,7 @@ param(
 
     [string]$ImageName = "engram-vllm-worker",
 
-    [string]$Tag = "latest",
-
-    [string]$BaseImage = "vllm/vllm-openai:gptoss"
+    [string]$Tag = "latest"
 )
 
 $ErrorActionPreference = "Stop"
@@ -24,8 +21,7 @@ Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "  engram vllm worker image builder" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "  base image:  $BaseImage"
-Write-Host "  output:      $fullImage"
+Write-Host "  output:  $fullImage"
 Write-Host ""
 
 # check docker is available
@@ -34,15 +30,9 @@ if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
     exit 1
 }
 
-# free up disk before building (vllm base images are huge)
-Write-Host "pruning docker build cache..." -ForegroundColor Yellow
-docker builder prune -f 2>$null
-docker image prune -f 2>$null
-
 # build
 Write-Host "building image..." -ForegroundColor Yellow
 docker build `
-    --build-arg BASE_IMAGE=$BaseImage `
     -t $fullImage `
     -f docker/vllm-worker/Dockerfile `
     docker/vllm-worker/
@@ -72,4 +62,3 @@ Write-Host ""
 Write-Host "  use this image in deploy_vllm.py:"
 Write-Host "    python scripts/deploy_vllm.py --image $fullImage"
 Write-Host ""
-

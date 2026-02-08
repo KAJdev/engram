@@ -1,28 +1,19 @@
 """deploy a vllm serverless endpoint on runpod for synthetic data generation.
 
-this creates a serverless endpoint running vllm with a large open source model.
-once deployed, you get an openai-compatible url to query for datagen.
+build the worker image first, then deploy it here.
 
 usage:
-    # deploy with defaults (llama 3.3 70b on 2x a100 80gb)
-    python scripts/deploy_vllm.py
+    # build and push the image first
+    .\\docker\\build_and_push.ps1 -DockerUser yourusername
 
-    # deploy with custom image (for gpt-oss or other custom vllm builds)
+    # deploy (defaults to qwen 2.5 72b on 2x a100 80gb)
     python scripts/deploy_vllm.py --image yourusername/engram-vllm-worker:latest
-
-    # deploy with specific model
-    python scripts/deploy_vllm.py --model Qwen/Qwen2.5-72B-Instruct
 
     # check status of existing endpoint
     python scripts/deploy_vllm.py --status ENDPOINT_ID
 
     # tear down endpoint when done
     python scripts/deploy_vllm.py --delete ENDPOINT_ID
-
-to build and push a custom image for gpt-oss:
-    .\\docker\\build_and_push.ps1 -DockerUser yourusername
-    # or on linux/mac:
-    ./docker/build_and_push.sh yourusername
 """
 
 import argparse
@@ -49,10 +40,10 @@ RECOMMENDED_MODELS = {
     "llama-3.1-70b": "meta-llama/Llama-3.1-70B-Instruct",
 }
 
-DEFAULT_MODEL = "meta-llama/Llama-3.3-70B-Instruct"
+DEFAULT_MODEL = "Qwen/Qwen2.5-72B-Instruct"
 
-# default runpod vllm image (works for standard hf models)
-DEFAULT_IMAGE = "runpod/worker-vllm:stable-cuda12.1.0"
+# default image — build with docker/build_and_push.ps1 first
+DEFAULT_IMAGE = "engram-vllm-worker:latest"
 
 # 70b models need ~140gb vram for bf16, so 2x a100-80gb or 2x h100
 DEFAULT_GPU = "NVIDIA A100 80GB PCIe"
@@ -74,9 +65,8 @@ def deploy(args):
 
     model = args.model
     image = args.image
-    is_custom = image != DEFAULT_IMAGE
     print(f"  model: {model}")
-    print(f"  image: {image}" + (" (custom)" if is_custom else ""))
+    print(f"  image: {image}")
     print(f"  gpu: {args.gpu}")
     print(f"  max workers: {args.max_workers}")
     print(f"  idle timeout: {args.idle_timeout}s")
@@ -91,9 +81,6 @@ def deploy(args):
         "GPU_MEMORY_UTILIZATION": "0.90",
         "DISABLE_LOG_STATS": "true",
     }
-    if not is_custom:
-        # runpod's official image uses DEFAULT_BATCH_SIZE
-        env["DEFAULT_BATCH_SIZE"] = "32"
     if args.tensor_parallel:
         env["TENSOR_PARALLEL_SIZE"] = str(args.tensor_parallel)
 
@@ -198,8 +185,7 @@ def main():
     )
     parser.add_argument(
         "--image", type=str, default=DEFAULT_IMAGE,
-        help=f"docker image for the worker. defaults to {DEFAULT_IMAGE}. "
-             "use your custom image for gpt-oss or other non-standard models.",
+        help=f"docker image for the worker. defaults to {DEFAULT_IMAGE}.",
     )
     parser.add_argument(
         "--gpu", type=str, default=DEFAULT_GPU,
