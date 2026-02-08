@@ -360,18 +360,18 @@ Return as JSON array where each memory has:
 Return ONLY the JSON array, no other text."""
 
 
-EDGE_LABEL_PROMPT = """Here are two memories from the same person:
-Memory A: {memory_a}
-Memory B: {memory_b}
+EDGE_LABEL_PROMPT = """Here are memories from one person, and pairs to judge.
 
-Are these memories related? Respond with JSON:
-{{
-  "edge_exists": true/false,
-  "edge_type": "complementary" | "causal" | "temporal_sequence" | "contradictory" | "elaborative" | "entity_overlap" | "none",
-  "edge_weight": 0.0-1.0,
-  "implication": "if complementary, what does their combination imply that neither states alone?",
-  "confidence": 0.0-1.0
-}}
+Memories:
+{memories_text}
+
+Judge each pair. For each, respond with:
+- "a": index of memory A
+- "b": index of memory B
+- "edge_exists": true/false
+- "edge_type": "complementary" | "causal" | "temporal_sequence" | "contradictory" | "elaborative" | "entity_overlap" | "none"
+- "edge_weight": 0.0-1.0
+- "implication": if complementary, what does the combination imply that neither states alone?
 
 Edge types:
 - complementary: combination implies something neither states alone (THIS IS THE MOST IMPORTANT TYPE)
@@ -382,7 +382,10 @@ Edge types:
 - entity_overlap: share entities but not otherwise deeply related
 - none: unrelated
 
-Return ONLY the JSON, no other text."""
+Pairs to judge:
+{pairs_text}
+
+Return a JSON array of objects, one per pair. Return ONLY the JSON array, no other text."""
 
 
 RETRIEVAL_LABEL_PROMPT = """Here are memories for a person:
@@ -398,14 +401,16 @@ For each question, return JSON with:
 Return as JSON array. Return ONLY the JSON array, no other text."""
 
 
-SYNTHESIS_LABEL_PROMPT = """Memory A: {memory_a}
-Memory B: {memory_b}
+SYNTHESIS_LABEL_PROMPT = """For each complementary memory pair below, write 3-5 queries where BOTH memories are needed to give a good answer, but where NEITHER alone would be retrieved by standard keyword/semantic search.
 
-These have a complementary relationship: {implication}
+{pairs_text}
 
-Write 3-5 queries where BOTH memories would be needed to give a good answer, but where NEITHER memory alone would be retrieved by standard keyword/semantic search.
+Return a JSON array of objects, each with:
+- "a": index of memory A
+- "b": index of memory B
+- "queries": list of query strings
 
-Return as JSON array of strings. Return ONLY the JSON array, no other text."""
+Return ONLY the JSON array, no other text."""
 
 
 async def generate_llm_dataset(config: DataGenConfig) -> dict:
@@ -493,33 +498,43 @@ async def generate_llm_dataset(config: DataGenConfig) -> dict:
                 timestamp_days=m.get("day", i),
             ))
 
-        # edge labels for sampled pairs
+        # edge labels for sampled pairs (batched: 25 pairs per LLM call)
         pairs = _sample_pairs(len(memories), config.pairs_per_user)
-        edge_tasks = []
-        for a, b in pairs:
-            async def gen_edge(a=a, b=b):
-                async with sem:
-                    try:
-                        prompt = EDGE_LABEL_PROMPT.format(
-                            memory_a=memories[a]["text"],
-                            memory_b=memories[b]["text"],
-                        )
-                        raw = await call_llm(prompt)
-                        label = json.loads(raw)
-                        return EdgeLabel(
-                            user_id=uid, memory_a_idx=a, memory_b_idx=b,
+        EDGE_BATCH_SIZE = 25
+        pair_batches = [pairs[i:i+EDGE_BATCH_SIZE] for i in range(0, len(pairs), EDGE_BATCH_SIZE)]
+        mem_text = "\n".join(f"[{i}] {m['text']}" for i, m in enumerate(memories))
+
+        async def gen_edge_batch(batch):
+            async with sem:
+                try:
+                    pairs_text = "\n".join(f"- ({a}, {b})" for a, b in batch)
+                    prompt = EDGE_LABEL_PROMPT.format(
+                        memories_text=mem_text,
+                        pairs_text=pairs_text,
+                    )
+                    raw = await call_llm(prompt)
+                    labels = json.loads(raw)
+                    results = []
+                    for label in labels:
+                        a_idx = label.get("a", batch[0][0])
+                        b_idx = label.get("b", batch[0][1])
+                        results.append(EdgeLabel(
+                            user_id=uid, memory_a_idx=a_idx, memory_b_idx=b_idx,
                             edge_exists=label["edge_exists"],
                             edge_type=label["edge_type"],
                             edge_weight=label.get("edge_weight", 0.5),
                             implication=label.get("implication", ""),
-                        )
-                    except Exception as e:
-                        print(f"Failed edge ({a},{b}) user {uid}: {e}")
-                        return None
-            edge_tasks.append(gen_edge())
+                        ))
+                    return results
+                except Exception as e:
+                    print(f"Failed edge batch user {uid}: {e}")
+                    return []
 
-        edges = [e for e in await asyncio.gather(*edge_tasks) if e is not None]
+        edge_batch_tasks = [gen_edge_batch(batch) for batch in pair_batches]
+        edge_results = await asyncio.gather(*edge_batch_tasks)
+        edges = [e for batch in edge_results for e in batch]
         all_edges.extend(edges)
+        print(f"  user {uid}: {len(edges)} edges from {len(pair_batches)} batched calls")
 
         # retrieval labels
         async def gen_retrieval():
@@ -548,33 +563,39 @@ async def generate_llm_dataset(config: DataGenConfig) -> dict:
         retrieval = await gen_retrieval()
         all_retrieval.extend(retrieval)
 
-        # synthesis labels for complementary edges
+        # synthesis labels for complementary edges (batched: 10 per call)
         comp_edges = [e for e in edges if e.edge_type == "complementary" and e.edge_exists]
-        synth_tasks = []
-        for edge in comp_edges:
-            async def gen_synth(edge=edge):
-                async with sem:
-                    try:
-                        prompt = SYNTHESIS_LABEL_PROMPT.format(
-                            memory_a=memories[edge.memory_a_idx]["text"],
-                            memory_b=memories[edge.memory_b_idx]["text"],
-                            implication=edge.implication,
-                        )
-                        raw = await call_llm(prompt)
-                        queries = json.loads(raw)
-                        return SynthesisLabel(
-                            user_id=uid,
-                            memory_a_idx=edge.memory_a_idx,
-                            memory_b_idx=edge.memory_b_idx,
-                            queries=queries,
-                        )
-                    except Exception as e:
-                        print(f"Failed synthesis user {uid}: {e}")
-                        return None
-            synth_tasks.append(gen_synth())
+        SYNTH_BATCH_SIZE = 10
+        synth_batches = [comp_edges[i:i+SYNTH_BATCH_SIZE] for i in range(0, len(comp_edges), SYNTH_BATCH_SIZE)]
 
-        synths = [s for s in await asyncio.gather(*synth_tasks) if s is not None]
+        async def gen_synth_batch(batch):
+            async with sem:
+                try:
+                    pairs_text = "\n".join(
+                        f"Pair ({e.memory_a_idx}, {e.memory_b_idx}):\n  A: {memories[e.memory_a_idx]['text']}\n  B: {memories[e.memory_b_idx]['text']}\n  Implication: {e.implication}"
+                        for e in batch
+                    )
+                    prompt = SYNTHESIS_LABEL_PROMPT.format(pairs_text=pairs_text)
+                    raw = await call_llm(prompt)
+                    labels = json.loads(raw)
+                    results = []
+                    for label in labels:
+                        results.append(SynthesisLabel(
+                            user_id=uid,
+                            memory_a_idx=label["a"],
+                            memory_b_idx=label["b"],
+                            queries=label["queries"],
+                        ))
+                    return results
+                except Exception as e:
+                    print(f"Failed synthesis batch user {uid}: {e}")
+                    return []
+
+        synth_batch_tasks = [gen_synth_batch(batch) for batch in synth_batches]
+        synth_results = await asyncio.gather(*synth_batch_tasks)
+        synths = [s for batch in synth_results for s in batch]
         all_synthesis.extend(synths)
+        print(f"  user {uid}: {len(synths)} synthesis from {len(synth_batches)} batched calls")
 
     _save_jsonl(output_dir / "memories.jsonl", [asdict(m) for m in all_memories])
     _save_jsonl(output_dir / "edges.jsonl", [asdict(e) for e in all_edges])
