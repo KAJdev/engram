@@ -1,0 +1,14 @@
+{"user_id": 0, "memory_a_idx": 0, "memory_b_idx": 1, "queries": ["should I take ibuprofen for my headache", "are there any risks with my current medications", "what should I tell my doctor at my next visit"]}
+{"user_id": 0, "memory_a_idx": 0, "memory_b_idx": 7, "queries": ["what should I tell my dentist", "is it safe to have dental work done"]}
+{"user_id": 0, "memory_a_idx": 0, "memory_b_idx": 4, "queries": ["should I change my diet while on medication", "does my new diet affect my treatment"]}
+{"user_id": 1, "memory_a_idx": 1, "memory_b_idx": 2, "queries": ["what training does my team need", "what are the biggest risks for the GCP migration"]}
+{"user_id": 1, "memory_a_idx": 4, "memory_b_idx": 5, "queries": ["how should I plan my Q2 schedule", "will I have enough bandwidth for the migration"]}
+{"user_id": 1, "memory_a_idx": 9, "memory_b_idx": 7, "queries": ["what should I highlight in my review", "am I at risk in my performance review"]}
+{"user_id": 2, "memory_a_idx": 0, "memory_b_idx": 1, "queries": ["where can I eat in rural Japan", "will I be able to find food I can eat"]}
+{"user_id": 2, "memory_a_idx": 2, "memory_b_idx": 1, "queries": ["what allergy card should I carry in Japan", "how do I explain my allergy in Japanese"]}
+{"user_id": 2, "memory_a_idx": 2, "memory_b_idx": 3, "queries": ["how do I say I'm allergic to shellfish in Japanese"]}
+{"user_id": 3, "memory_a_idx": 0, "memory_b_idx": 3, "queries": ["will I be able to handle the conference talk", "should I prepare differently for this presentation"]}
+{"user_id": 4, "memory_a_idx": 0, "memory_b_idx": 1, "queries": ["what movie should I watch", "what book should I read next"]}
+{"user_id": 4, "memory_a_idx": 3, "memory_b_idx": 5, "queries": ["recommend something atmospheric and mysterious"]}
+{"user_id": 5, "memory_a_idx": 0, "memory_b_idx": 1, "queries": ["can anyone I know help with visa issues", "how can I support Raj"]}
+{"user_id": 5, "memory_a_idx": 3, "memory_b_idx": 5, "queries": ["does anyone I know work with animals"]}

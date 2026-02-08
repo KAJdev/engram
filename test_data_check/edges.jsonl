@@ -1,0 +1,123 @@
+{"user_id": 0, "memory_a_idx": 0, "memory_b_idx": 1, "edge_exists": true, "edge_type": "complementary", "edge_weight": 0.95, "implication": "Dangerous drug interaction: St. John's Wort reduces warfarin effectiveness, increasing clotting risk"}
+{"user_id": 0, "memory_a_idx": 0, "memory_b_idx": 7, "edge_exists": true, "edge_type": "complementary", "edge_weight": 0.8, "implication": "Dentist needs to know about warfarin due to bleeding risk during procedures"}
+{"user_id": 0, "memory_a_idx": 0, "memory_b_idx": 9, "edge_exists": true, "edge_type": "elaborative", "edge_weight": 0.7, "implication": ""}
+{"user_id": 0, "memory_a_idx": 1, "memory_b_idx": 5, "edge_exists": true, "edge_type": "entity_overlap", "edge_weight": 0.5, "implication": ""}
+{"user_id": 0, "memory_a_idx": 0, "memory_b_idx": 6, "edge_exists": true, "edge_type": "elaborative", "edge_weight": 0.6, "implication": ""}
+{"user_id": 0, "memory_a_idx": 4, "memory_b_idx": 0, "edge_exists": true, "edge_type": "complementary", "edge_weight": 0.7, "implication": "Vegetarian diet changes vitamin K intake which affects warfarin dosing"}
+{"user_id": 0, "memory_a_idx": 4, "memory_b_idx": 3, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 0, "memory_a_idx": 3, "memory_b_idx": 2, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 0, "memory_a_idx": 1, "memory_b_idx": 8, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 0, "memory_a_idx": 1, "memory_b_idx": 9, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 0, "memory_a_idx": 8, "memory_b_idx": 9, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 0, "memory_a_idx": 0, "memory_b_idx": 8, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 0, "memory_a_idx": 3, "memory_b_idx": 8, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 0, "memory_a_idx": 6, "memory_b_idx": 3, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 0, "memory_a_idx": 7, "memory_b_idx": 9, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 0, "memory_a_idx": 2, "memory_b_idx": 6, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 0, "memory_a_idx": 5, "memory_b_idx": 4, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 0, "memory_a_idx": 2, "memory_b_idx": 3, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 1, "memory_a_idx": 1, "memory_b_idx": 2, "edge_exists": true, "edge_type": "complementary", "edge_weight": 0.9, "implication": "Skills gap risk: team needs GCP skills but key members only know AWS"}
+{"user_id": 1, "memory_a_idx": 0, "memory_b_idx": 7, "edge_exists": true, "edge_type": "causal", "edge_weight": 0.7, "implication": ""}
+{"user_id": 1, "memory_a_idx": 1, "memory_b_idx": 4, "edge_exists": true, "edge_type": "temporal_sequence", "edge_weight": 0.8, "implication": ""}
+{"user_id": 1, "memory_a_idx": 4, "memory_b_idx": 5, "edge_exists": true, "edge_type": "complementary", "edge_weight": 0.85, "implication": "Migration deadline and baby due date both in Q2 - major capacity conflict"}
+{"user_id": 1, "memory_a_idx": 6, "memory_b_idx": 7, "edge_exists": true, "edge_type": "causal", "edge_weight": 0.75, "implication": ""}
+{"user_id": 1, "memory_a_idx": 6, "memory_b_idx": 8, "edge_exists": true, "edge_type": "causal", "edge_weight": 0.6, "implication": ""}
+{"user_id": 1, "memory_a_idx": 3, "memory_b_idx": 1, "edge_exists": true, "edge_type": "elaborative", "edge_weight": 0.65, "implication": ""}
+{"user_id": 1, "memory_a_idx": 9, "memory_b_idx": 7, "edge_exists": true, "edge_type": "complementary", "edge_weight": 0.7, "implication": "Performance review coming while team velocity is down"}
+{"user_id": 1, "memory_a_idx": 1, "memory_b_idx": 6, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 1, "memory_a_idx": 1, "memory_b_idx": 5, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 1, "memory_a_idx": 5, "memory_b_idx": 9, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 1, "memory_a_idx": 4, "memory_b_idx": 0, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 1, "memory_a_idx": 7, "memory_b_idx": 8, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 1, "memory_a_idx": 1, "memory_b_idx": 6, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 1, "memory_a_idx": 1, "memory_b_idx": 8, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 1, "memory_a_idx": 4, "memory_b_idx": 9, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 1, "memory_a_idx": 5, "memory_b_idx": 9, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 1, "memory_a_idx": 0, "memory_b_idx": 3, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 1, "memory_a_idx": 6, "memory_b_idx": 4, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 1, "memory_a_idx": 7, "memory_b_idx": 5, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 1, "memory_a_idx": 2, "memory_b_idx": 5, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 1, "memory_a_idx": 5, "memory_b_idx": 3, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 1, "memory_a_idx": 9, "memory_b_idx": 2, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 1, "memory_a_idx": 8, "memory_b_idx": 3, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 1, "memory_a_idx": 2, "memory_b_idx": 7, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 1, "memory_a_idx": 6, "memory_b_idx": 4, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 1, "memory_a_idx": 8, "memory_b_idx": 3, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 1, "memory_a_idx": 5, "memory_b_idx": 0, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 2, "memory_a_idx": 0, "memory_b_idx": 1, "edge_exists": true, "edge_type": "complementary", "edge_weight": 0.9, "implication": "Being vegetarian in rural Japan is very challenging - limited options, dashi in everything"}
+{"user_id": 2, "memory_a_idx": 2, "memory_b_idx": 1, "edge_exists": true, "edge_type": "complementary", "edge_weight": 0.85, "implication": "Shellfish allergy in Japan is dangerous - hidden shellfish in many dishes, need to communicate clearly"}
+{"user_id": 2, "memory_a_idx": 3, "memory_b_idx": 1, "edge_exists": true, "edge_type": "elaborative", "edge_weight": 0.7, "implication": ""}
+{"user_id": 2, "memory_a_idx": 3, "memory_b_idx": 2, "edge_exists": true, "edge_type": "complementary", "edge_weight": 0.75, "implication": "Japanese language skills needed to communicate allergy - could be life-saving"}
+{"user_id": 2, "memory_a_idx": 7, "memory_b_idx": 1, "edge_exists": true, "edge_type": "complementary", "edge_weight": 0.8, "implication": "Partner's gluten restriction adds another dietary constraint for Japan trip"}
+{"user_id": 2, "memory_a_idx": 8, "memory_b_idx": 1, "edge_exists": true, "edge_type": "entity_overlap", "edge_weight": 0.5, "implication": ""}
+{"user_id": 2, "memory_a_idx": 6, "memory_b_idx": 1, "edge_exists": true, "edge_type": "complementary", "edge_weight": 0.6, "implication": "Could plan scuba diving in Okinawa during Japan trip"}
+{"user_id": 2, "memory_a_idx": 9, "memory_b_idx": 1, "edge_exists": true, "edge_type": "temporal_sequence", "edge_weight": 0.7, "implication": ""}
+{"user_id": 2, "memory_a_idx": 3, "memory_b_idx": 0, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 2, "memory_a_idx": 5, "memory_b_idx": 6, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 2, "memory_a_idx": 4, "memory_b_idx": 1, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 2, "memory_a_idx": 3, "memory_b_idx": 9, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 2, "memory_a_idx": 5, "memory_b_idx": 3, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 2, "memory_a_idx": 7, "memory_b_idx": 6, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 2, "memory_a_idx": 7, "memory_b_idx": 2, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 2, "memory_a_idx": 4, "memory_b_idx": 2, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 2, "memory_a_idx": 3, "memory_b_idx": 8, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 2, "memory_a_idx": 8, "memory_b_idx": 4, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 2, "memory_a_idx": 9, "memory_b_idx": 6, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 2, "memory_a_idx": 9, "memory_b_idx": 6, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 2, "memory_a_idx": 5, "memory_b_idx": 3, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 2, "memory_a_idx": 2, "memory_b_idx": 8, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 2, "memory_a_idx": 6, "memory_b_idx": 9, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 2, "memory_a_idx": 6, "memory_b_idx": 9, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 2, "memory_a_idx": 7, "memory_b_idx": 8, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 2, "memory_a_idx": 4, "memory_b_idx": 8, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 2, "memory_a_idx": 8, "memory_b_idx": 4, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 3, "memory_a_idx": 0, "memory_b_idx": 3, "edge_exists": true, "edge_type": "complementary", "edge_weight": 0.9, "implication": "Pattern: anxiety before presentations + now invited to conference talk = likely anxiety trigger"}
+{"user_id": 3, "memory_a_idx": 0, "memory_b_idx": 1, "edge_exists": true, "edge_type": "causal", "edge_weight": 0.8, "implication": ""}
+{"user_id": 3, "memory_a_idx": 1, "memory_b_idx": 2, "edge_exists": true, "edge_type": "causal", "edge_weight": 0.7, "implication": ""}
+{"user_id": 3, "memory_a_idx": 1, "memory_b_idx": 7, "edge_exists": true, "edge_type": "elaborative", "edge_weight": 0.75, "implication": ""}
+{"user_id": 3, "memory_a_idx": 0, "memory_b_idx": 4, "edge_exists": true, "edge_type": "causal", "edge_weight": 0.65, "implication": ""}
+{"user_id": 3, "memory_a_idx": 2, "memory_b_idx": 7, "edge_exists": true, "edge_type": "elaborative", "edge_weight": 0.6, "implication": ""}
+{"user_id": 3, "memory_a_idx": 6, "memory_b_idx": 0, "edge_exists": true, "edge_type": "complementary", "edge_weight": 0.5, "implication": "Physical routine disruption often correlates with anxiety episodes"}
+{"user_id": 3, "memory_a_idx": 5, "memory_b_idx": 1, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 3, "memory_a_idx": 4, "memory_b_idx": 6, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 3, "memory_a_idx": 4, "memory_b_idx": 3, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 3, "memory_a_idx": 2, "memory_b_idx": 5, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 3, "memory_a_idx": 2, "memory_b_idx": 0, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 3, "memory_a_idx": 5, "memory_b_idx": 7, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 3, "memory_a_idx": 5, "memory_b_idx": 4, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 3, "memory_a_idx": 3, "memory_b_idx": 1, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 3, "memory_a_idx": 2, "memory_b_idx": 4, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 3, "memory_a_idx": 6, "memory_b_idx": 3, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 3, "memory_a_idx": 3, "memory_b_idx": 4, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 3, "memory_a_idx": 6, "memory_b_idx": 5, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 4, "memory_a_idx": 0, "memory_b_idx": 1, "edge_exists": true, "edge_type": "complementary", "edge_weight": 0.8, "implication": "Both involve themes of time, infinity, and language - clear aesthetic pattern"}
+{"user_id": 4, "memory_a_idx": 0, "memory_b_idx": 5, "edge_exists": true, "edge_type": "entity_overlap", "edge_weight": 0.6, "implication": ""}
+{"user_id": 4, "memory_a_idx": 2, "memory_b_idx": 4, "edge_exists": true, "edge_type": "elaborative", "edge_weight": 0.7, "implication": ""}
+{"user_id": 4, "memory_a_idx": 2, "memory_b_idx": 7, "edge_exists": true, "edge_type": "elaborative", "edge_weight": 0.7, "implication": ""}
+{"user_id": 4, "memory_a_idx": 0, "memory_b_idx": 3, "edge_exists": true, "edge_type": "entity_overlap", "edge_weight": 0.65, "implication": ""}
+{"user_id": 4, "memory_a_idx": 3, "memory_b_idx": 5, "edge_exists": true, "edge_type": "complementary", "edge_weight": 0.7, "implication": "Both atmospheric, mysterious sci-fi - VanderMeer and Tarkovsky share aesthetic sensibility"}
+{"user_id": 4, "memory_a_idx": 6, "memory_b_idx": 2, "edge_exists": true, "edge_type": "elaborative", "edge_weight": 0.5, "implication": ""}
+{"user_id": 4, "memory_a_idx": 1, "memory_b_idx": 3, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 4, "memory_a_idx": 3, "memory_b_idx": 1, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 4, "memory_a_idx": 5, "memory_b_idx": 1, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 4, "memory_a_idx": 3, "memory_b_idx": 4, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 4, "memory_a_idx": 7, "memory_b_idx": 3, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 4, "memory_a_idx": 3, "memory_b_idx": 7, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 4, "memory_a_idx": 6, "memory_b_idx": 3, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 4, "memory_a_idx": 6, "memory_b_idx": 5, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 4, "memory_a_idx": 7, "memory_b_idx": 0, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 4, "memory_a_idx": 6, "memory_b_idx": 5, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 4, "memory_a_idx": 1, "memory_b_idx": 3, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 5, "memory_a_idx": 0, "memory_b_idx": 1, "edge_exists": true, "edge_type": "complementary", "edge_weight": 0.9, "implication": "Sister could potentially help or advise Raj with his immigration situation"}
+{"user_id": 5, "memory_a_idx": 1, "memory_b_idx": 6, "edge_exists": true, "edge_type": "elaborative", "edge_weight": 0.8, "implication": ""}
+{"user_id": 5, "memory_a_idx": 2, "memory_b_idx": 5, "edge_exists": true, "edge_type": "entity_overlap", "edge_weight": 0.6, "implication": ""}
+{"user_id": 5, "memory_a_idx": 3, "memory_b_idx": 5, "edge_exists": true, "edge_type": "complementary", "edge_weight": 0.7, "implication": "Neighbor's new rescue dog + Dave's wife is a vet - could connect them"}
+{"user_id": 5, "memory_a_idx": 4, "memory_b_idx": 3, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 5, "memory_a_idx": 1, "memory_b_idx": 3, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 5, "memory_a_idx": 1, "memory_b_idx": 2, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 5, "memory_a_idx": 3, "memory_b_idx": 1, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 5, "memory_a_idx": 6, "memory_b_idx": 0, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 5, "memory_a_idx": 3, "memory_b_idx": 6, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 5, "memory_a_idx": 4, "memory_b_idx": 0, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 5, "memory_a_idx": 0, "memory_b_idx": 5, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}
+{"user_id": 5, "memory_a_idx": 4, "memory_b_idx": 6, "edge_exists": false, "edge_type": "none", "edge_weight": 0.0, "implication": ""}

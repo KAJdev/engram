@@ -1,0 +1,53 @@
+{"text": "My doctor put me on warfarin for my blood clot last month", "user_id": 0, "memory_idx": 0, "entities": ["warfarin", "blood clot"], "themes": ["health", "medication"], "timestamp_days": 0}
+{"text": "I've been taking St. John's Wort for my mood lately", "user_id": 0, "memory_idx": 1, "entities": ["st johns wort"], "themes": ["health", "medication", "mental health"], "timestamp_days": 15}
+{"text": "I love going for morning runs in the park", "user_id": 0, "memory_idx": 2, "entities": ["park"], "themes": ["exercise", "routine"], "timestamp_days": 3}
+{"text": "My sister's wedding is next month and I'm the best man", "user_id": 0, "memory_idx": 3, "entities": ["sister"], "themes": ["family", "events"], "timestamp_days": 20}
+{"text": "I switched to a vegetarian diet three weeks ago", "user_id": 0, "memory_idx": 4, "entities": [], "themes": ["diet", "health"], "timestamp_days": 10}
+{"text": "Been having trouble sleeping, might try melatonin", "user_id": 0, "memory_idx": 5, "entities": ["melatonin"], "themes": ["health", "sleep"], "timestamp_days": 25}
+{"text": "My blood pressure has been running a bit high lately", "user_id": 0, "memory_idx": 6, "entities": ["blood pressure"], "themes": ["health"], "timestamp_days": 18}
+{"text": "I have a dentist appointment next Tuesday", "user_id": 0, "memory_idx": 7, "entities": ["dentist"], "themes": ["health", "appointments"], "timestamp_days": 28}
+{"text": "Started a new project at work managing the cloud migration", "user_id": 0, "memory_idx": 8, "entities": ["cloud migration"], "themes": ["work", "technology"], "timestamp_days": 5}
+{"text": "I need to pick up my prescription refill from CVS", "user_id": 0, "memory_idx": 9, "entities": ["CVS", "prescription"], "themes": ["health", "medication", "errands"], "timestamp_days": 22}
+{"text": "I manage a team of 5 software engineers", "user_id": 1, "memory_idx": 0, "entities": ["team"], "themes": ["work", "management"], "timestamp_days": 0}
+{"text": "We're planning to migrate our infrastructure to GCP", "user_id": 1, "memory_idx": 1, "entities": ["GCP"], "themes": ["work", "technology", "cloud"], "timestamp_days": 5}
+{"text": "Two of my engineers only have AWS experience", "user_id": 1, "memory_idx": 2, "entities": ["AWS"], "themes": ["work", "skills", "cloud"], "timestamp_days": 8}
+{"text": "I've been learning Kubernetes in my spare time", "user_id": 1, "memory_idx": 3, "entities": ["Kubernetes"], "themes": ["technology", "learning"], "timestamp_days": 12}
+{"text": "The migration deadline is end of Q2", "user_id": 1, "memory_idx": 4, "entities": ["Q2"], "themes": ["work", "deadlines"], "timestamp_days": 15}
+{"text": "My wife and I are expecting our first child in June", "user_id": 1, "memory_idx": 5, "entities": ["wife", "child"], "themes": ["family", "life events"], "timestamp_days": 10}
+{"text": "I've been feeling burned out from the long hours", "user_id": 1, "memory_idx": 6, "entities": [], "themes": ["work", "mental health", "burnout"], "timestamp_days": 20}
+{"text": "Our team's sprint velocity has dropped 30% this quarter", "user_id": 1, "memory_idx": 7, "entities": ["sprint velocity"], "themes": ["work", "productivity"], "timestamp_days": 22}
+{"text": "I got a LinkedIn message from a recruiter at a startup", "user_id": 1, "memory_idx": 8, "entities": ["LinkedIn", "recruiter"], "themes": ["career", "opportunity"], "timestamp_days": 25}
+{"text": "My performance review is coming up next month", "user_id": 1, "memory_idx": 9, "entities": ["performance review"], "themes": ["work", "career"], "timestamp_days": 27}
+{"text": "I've been vegetarian for five years now", "user_id": 2, "memory_idx": 0, "entities": [], "themes": ["diet", "lifestyle"], "timestamp_days": 0}
+{"text": "Planning a three-week trip to rural Japan next spring", "user_id": 2, "memory_idx": 1, "entities": ["Japan"], "themes": ["travel", "planning"], "timestamp_days": 5}
+{"text": "I'm severely allergic to shellfish", "user_id": 2, "memory_idx": 2, "entities": ["shellfish"], "themes": ["health", "diet", "allergy"], "timestamp_days": 2}
+{"text": "I speak basic conversational Japanese from college", "user_id": 2, "memory_idx": 3, "entities": ["Japanese"], "themes": ["language", "skills"], "timestamp_days": 3}
+{"text": "My budget for the trip is about $4000", "user_id": 2, "memory_idx": 4, "entities": [], "themes": ["travel", "finance"], "timestamp_days": 7}
+{"text": "I practice yoga every morning without fail", "user_id": 2, "memory_idx": 5, "entities": ["yoga"], "themes": ["exercise", "routine"], "timestamp_days": 1}
+{"text": "I recently got certified as a scuba diver", "user_id": 2, "memory_idx": 6, "entities": ["scuba"], "themes": ["hobbies", "sports"], "timestamp_days": 15}
+{"text": "My partner doesn't eat gluten", "user_id": 2, "memory_idx": 7, "entities": ["partner"], "themes": ["diet", "relationships"], "timestamp_days": 8}
+{"text": "I've been reading Haruki Murakami novels obsessively", "user_id": 2, "memory_idx": 8, "entities": ["Murakami"], "themes": ["hobbies", "literature", "Japan"], "timestamp_days": 10}
+{"text": "I need to renew my passport before the trip", "user_id": 2, "memory_idx": 9, "entities": ["passport"], "themes": ["travel", "errands"], "timestamp_days": 12}
+{"text": "Had a panic attack before my presentation at the all-hands meeting", "user_id": 3, "memory_idx": 0, "entities": ["presentation", "all-hands"], "themes": ["work", "mental health", "anxiety"], "timestamp_days": 0}
+{"text": "Skipped the team offsite last weekend, said I was sick", "user_id": 3, "memory_idx": 1, "entities": ["team offsite"], "themes": ["work", "avoidance", "social"], "timestamp_days": 10}
+{"text": "My manager mentioned I seem less engaged lately", "user_id": 3, "memory_idx": 2, "entities": ["manager"], "themes": ["work", "feedback"], "timestamp_days": 15}
+{"text": "I've been invited to give a talk at the regional conference", "user_id": 3, "memory_idx": 3, "entities": ["conference"], "themes": ["work", "career", "public speaking"], "timestamp_days": 20}
+{"text": "Started seeing a therapist for general anxiety", "user_id": 3, "memory_idx": 4, "entities": ["therapist"], "themes": ["mental health", "treatment"], "timestamp_days": 12}
+{"text": "I really enjoy the coding parts of my job", "user_id": 3, "memory_idx": 5, "entities": [], "themes": ["work", "satisfaction"], "timestamp_days": 5}
+{"text": "My gym routine has been really inconsistent this month", "user_id": 3, "memory_idx": 6, "entities": ["gym"], "themes": ["exercise", "routine", "wellbeing"], "timestamp_days": 18}
+{"text": "I keep declining after-work social invitations", "user_id": 3, "memory_idx": 7, "entities": [], "themes": ["social", "avoidance"], "timestamp_days": 22}
+{"text": "I absolutely loved the movie Arrival - the way it handles time and language was incredible", "user_id": 4, "memory_idx": 0, "entities": ["Arrival"], "themes": ["entertainment", "preferences", "sci-fi"], "timestamp_days": 0}
+{"text": "Been reading a lot of Jorge Luis Borges short stories", "user_id": 4, "memory_idx": 1, "entities": ["Borges"], "themes": ["literature", "preferences"], "timestamp_days": 5}
+{"text": "I prefer slow, thoughtful content over action-packed stuff", "user_id": 4, "memory_idx": 2, "entities": [], "themes": ["preferences", "entertainment"], "timestamp_days": 8}
+{"text": "Just finished Annihilation by Jeff VanderMeer and loved it", "user_id": 4, "memory_idx": 3, "entities": ["Annihilation", "VanderMeer"], "themes": ["literature", "preferences", "sci-fi"], "timestamp_days": 12}
+{"text": "I find most Marvel movies pretty boring honestly", "user_id": 4, "memory_idx": 4, "entities": ["Marvel"], "themes": ["preferences", "entertainment"], "timestamp_days": 3}
+{"text": "Stalker by Tarkovsky is my favorite film of all time", "user_id": 4, "memory_idx": 5, "entities": ["Stalker", "Tarkovsky"], "themes": ["entertainment", "preferences", "film"], "timestamp_days": 1}
+{"text": "I've been getting into ambient electronic music lately", "user_id": 4, "memory_idx": 6, "entities": [], "themes": ["music", "preferences"], "timestamp_days": 15}
+{"text": "Tried watching the latest Netflix action thriller, turned it off after 20 minutes", "user_id": 4, "memory_idx": 7, "entities": ["Netflix"], "themes": ["entertainment", "preferences"], "timestamp_days": 18}
+{"text": "My sister is an immigration lawyer in Boston", "user_id": 5, "memory_idx": 0, "entities": ["sister", "immigration lawyer", "Boston"], "themes": ["family", "careers"], "timestamp_days": 0}
+{"text": "My coworker Raj mentioned his H1B visa renewal is causing him stress", "user_id": 5, "memory_idx": 1, "entities": ["Raj", "H1B visa"], "themes": ["work", "immigration", "relationships"], "timestamp_days": 10}
+{"text": "I play basketball with Dave every Thursday", "user_id": 5, "memory_idx": 2, "entities": ["Dave", "basketball"], "themes": ["social", "exercise", "routine"], "timestamp_days": 2}
+{"text": "My neighbor just adopted a rescue dog from Guatemala", "user_id": 5, "memory_idx": 3, "entities": ["neighbor", "dog", "Guatemala"], "themes": ["community", "pets"], "timestamp_days": 15}
+{"text": "I'm organizing the company holiday party this year", "user_id": 5, "memory_idx": 4, "entities": ["holiday party"], "themes": ["work", "events", "social"], "timestamp_days": 20}
+{"text": "Dave's wife is a veterinarian", "user_id": 5, "memory_idx": 5, "entities": ["Dave", "veterinarian"], "themes": ["social", "careers"], "timestamp_days": 5}
+{"text": "Raj is one of our best engineers and I'd hate to lose him", "user_id": 5, "memory_idx": 6, "entities": ["Raj"], "themes": ["work", "team"], "timestamp_days": 12}

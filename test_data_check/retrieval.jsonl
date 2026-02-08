@@ -1,0 +1,18 @@
+{"user_id": 0, "query": "I have a terrible headache, should I just take ibuprofen?", "directly_relevant": [0], "jointly_relevant": [[0, 1]]}
+{"user_id": 0, "query": "What medications am I currently taking?", "directly_relevant": [0, 1, 5], "jointly_relevant": []}
+{"user_id": 0, "query": "Do I have any upcoming appointments?", "directly_relevant": [3, 7], "jointly_relevant": []}
+{"user_id": 0, "query": "Should I be worried about anything health-related?", "directly_relevant": [0, 6], "jointly_relevant": [[0, 1], [0, 4]]}
+{"user_id": 1, "query": "What risks should I think about for the migration?", "directly_relevant": [1, 4], "jointly_relevant": [[1, 2], [4, 5]]}
+{"user_id": 1, "query": "Should I consider the recruiter's offer?", "directly_relevant": [8], "jointly_relevant": [[6, 7, 8]]}
+{"user_id": 1, "query": "How should I prepare for my performance review?", "directly_relevant": [9], "jointly_relevant": [[7, 9], [0, 7]]}
+{"user_id": 2, "query": "Help me plan meals for my trip", "directly_relevant": [1], "jointly_relevant": [[0, 1], [2, 1], [7, 1]]}
+{"user_id": 2, "query": "What should I pack for Japan?", "directly_relevant": [1], "jointly_relevant": [[5, 1]]}
+{"user_id": 2, "query": "Are there any safety concerns for my trip?", "directly_relevant": [1, 9], "jointly_relevant": [[2, 1, 3]]}
+{"user_id": 3, "query": "Should I accept the conference speaking invitation?", "directly_relevant": [3], "jointly_relevant": [[0, 3], [0, 4, 3]]}
+{"user_id": 3, "query": "What should I talk about with my therapist?", "directly_relevant": [4], "jointly_relevant": [[0, 1, 2, 7]]}
+{"user_id": 3, "query": "Why do I feel so disconnected from work?", "directly_relevant": [2, 5], "jointly_relevant": [[1, 2, 7]]}
+{"user_id": 4, "query": "What should I watch tonight?", "directly_relevant": [2], "jointly_relevant": [[0, 2, 5], [4, 7]]}
+{"user_id": 4, "query": "Can you recommend a book for me?", "directly_relevant": [], "jointly_relevant": [[1, 3, 2]]}
+{"user_id": 4, "query": "What kind of content do I like?", "directly_relevant": [2, 4], "jointly_relevant": [[0, 1, 3, 5, 6]]}
+{"user_id": 5, "query": "Is there anything I can do to help Raj?", "directly_relevant": [1, 6], "jointly_relevant": [[0, 1]]}
+{"user_id": 5, "query": "My neighbor's dog seems sick, who should they call?", "directly_relevant": [3], "jointly_relevant": [[3, 5]]}

@@ -8,4 +8,5 @@ test_outputs/
 *.egg-info/
 .venv/
 .env
+scripts/run_training.bat
 .claude/settings.local.json

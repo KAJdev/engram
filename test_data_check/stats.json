@@ -1,0 +1,8 @@
+{
+  "num_users": 6,
+  "num_memories": 53,
+  "num_positive_edges": 40,
+  "num_negative_edges": 83,
+  "num_retrieval_queries": 18,
+  "num_synthesis_pairs": 14
+}
