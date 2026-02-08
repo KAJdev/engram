@@ -111,6 +111,7 @@ class DataGenConfig:
     output_dir: Path = Path("./data")
     max_concurrent: int = 10
     vllm_url: str = "http://localhost:8000/v1"
+    vllm_api_key: str = "not-needed"  # set to RUNPOD_API_KEY for runpod endpoints
 
 
 @dataclass

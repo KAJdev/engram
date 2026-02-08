@@ -50,6 +50,7 @@ class SynthesisLabel:
 
 # procedural demo dataset, no llm required
 
+
 def generate_demo_dataset(output_dir: Path, seed: int = 42) -> dict:
     """generate a small but realistic dataset for pipeline validation."""
     random.seed(seed)
@@ -64,25 +65,29 @@ def generate_demo_dataset(output_dir: Path, seed: int = 42) -> dict:
     for user_id, user_data in enumerate(users):
         memories = user_data["memories"]
         for i, m in enumerate(memories):
-            all_memories.append(Memory(
-                text=m["text"],
-                user_id=user_id,
-                memory_idx=i,
-                entities=m.get("entities", []),
-                themes=m.get("themes", []),
-                timestamp_days=m.get("day", i),
-            ))
+            all_memories.append(
+                Memory(
+                    text=m["text"],
+                    user_id=user_id,
+                    memory_idx=i,
+                    entities=m.get("entities", []),
+                    themes=m.get("themes", []),
+                    timestamp_days=m.get("day", i),
+                )
+            )
 
         for edge in user_data["edges"]:
-            all_edges.append(EdgeLabel(
-                user_id=user_id,
-                memory_a_idx=edge["a"],
-                memory_b_idx=edge["b"],
-                edge_exists=True,
-                edge_type=edge["type"],
-                edge_weight=edge.get("weight", 0.8),
-                implication=edge.get("implication", ""),
-            ))
+            all_edges.append(
+                EdgeLabel(
+                    user_id=user_id,
+                    memory_a_idx=edge["a"],
+                    memory_b_idx=edge["b"],
+                    edge_exists=True,
+                    edge_type=edge["type"],
+                    edge_weight=edge.get("weight", 0.8),
+                    implication=edge.get("implication", ""),
+                )
+            )
 
         # negative edges: unlabeled random pairs
         labeled_pairs = {(e["a"], e["b"]) for e in user_data["edges"]}
@@ -91,26 +96,36 @@ def generate_demo_dataset(output_dir: Path, seed: int = 42) -> dict:
             a = random.randint(0, len(memories) - 1)
             b = random.randint(0, len(memories) - 1)
             if a != b and (a, b) not in labeled_pairs and (b, a) not in labeled_pairs:
-                all_edges.append(EdgeLabel(
-                    user_id=user_id, memory_a_idx=a, memory_b_idx=b,
-                    edge_exists=False, edge_type="none", edge_weight=0.0,
-                ))
+                all_edges.append(
+                    EdgeLabel(
+                        user_id=user_id,
+                        memory_a_idx=a,
+                        memory_b_idx=b,
+                        edge_exists=False,
+                        edge_type="none",
+                        edge_weight=0.0,
+                    )
+                )
 
         for ret in user_data["retrieval"]:
-            all_retrieval.append(RetrievalLabel(
-                user_id=user_id,
-                query=ret["query"],
-                directly_relevant=ret["direct"],
-                jointly_relevant=ret.get("joint", []),
-            ))
+            all_retrieval.append(
+                RetrievalLabel(
+                    user_id=user_id,
+                    query=ret["query"],
+                    directly_relevant=ret["direct"],
+                    jointly_relevant=ret.get("joint", []),
+                )
+            )
 
         for synth in user_data.get("synthesis", []):
-            all_synthesis.append(SynthesisLabel(
-                user_id=user_id,
-                memory_a_idx=synth["a"],
-                memory_b_idx=synth["b"],
-                queries=synth["queries"],
-            ))
+            all_synthesis.append(
+                SynthesisLabel(
+                    user_id=user_id,
+                    memory_a_idx=synth["a"],
+                    memory_b_idx=synth["b"],
+                    queries=synth["queries"],
+                )
+            )
 
     _save_jsonl(output_dir / "memories.jsonl", [asdict(m) for m in all_memories])
     _save_jsonl(output_dir / "edges.jsonl", [asdict(e) for e in all_edges])
@@ -136,201 +151,738 @@ def _generate_demo_users() -> list[dict]:
     users = []
 
     # user 0: medical scenario
-    users.append({
-        "memories": [
-            {"text": "My doctor put me on warfarin for my blood clot last month", "entities": ["warfarin", "blood clot"], "themes": ["health", "medication"], "day": 0},
-            {"text": "I've been taking St. John's Wort for my mood lately", "entities": ["st johns wort"], "themes": ["health", "medication", "mental health"], "day": 15},
-            {"text": "I love going for morning runs in the park", "entities": ["park"], "themes": ["exercise", "routine"], "day": 3},
-            {"text": "My sister's wedding is next month and I'm the best man", "entities": ["sister"], "themes": ["family", "events"], "day": 20},
-            {"text": "I switched to a vegetarian diet three weeks ago", "entities": [], "themes": ["diet", "health"], "day": 10},
-            {"text": "Been having trouble sleeping, might try melatonin", "entities": ["melatonin"], "themes": ["health", "sleep"], "day": 25},
-            {"text": "My blood pressure has been running a bit high lately", "entities": ["blood pressure"], "themes": ["health"], "day": 18},
-            {"text": "I have a dentist appointment next Tuesday", "entities": ["dentist"], "themes": ["health", "appointments"], "day": 28},
-            {"text": "Started a new project at work managing the cloud migration", "entities": ["cloud migration"], "themes": ["work", "technology"], "day": 5},
-            {"text": "I need to pick up my prescription refill from CVS", "entities": ["CVS", "prescription"], "themes": ["health", "medication", "errands"], "day": 22},
-        ],
-        "edges": [
-            {"a": 0, "b": 1, "type": "complementary", "weight": 0.95, "implication": "Dangerous drug interaction: St. John's Wort reduces warfarin effectiveness, increasing clotting risk"},
-            {"a": 0, "b": 7, "type": "complementary", "weight": 0.8, "implication": "Dentist needs to know about warfarin due to bleeding risk during procedures"},
-            {"a": 0, "b": 9, "type": "elaborative", "weight": 0.7},
-            {"a": 1, "b": 5, "type": "entity_overlap", "weight": 0.5},
-            {"a": 0, "b": 6, "type": "elaborative", "weight": 0.6},
-            {"a": 4, "b": 0, "type": "complementary", "weight": 0.7, "implication": "Vegetarian diet changes vitamin K intake which affects warfarin dosing"},
-        ],
-        "retrieval": [
-            {"query": "I have a terrible headache, should I just take ibuprofen?", "direct": [0], "joint": [[0, 1]]},
-            {"query": "What medications am I currently taking?", "direct": [0, 1, 5], "joint": []},
-            {"query": "Do I have any upcoming appointments?", "direct": [3, 7], "joint": []},
-            {"query": "Should I be worried about anything health-related?", "direct": [0, 6], "joint": [[0, 1], [0, 4]]},
-        ],
-        "synthesis": [
-            {"a": 0, "b": 1, "queries": ["should I take ibuprofen for my headache", "are there any risks with my current medications", "what should I tell my doctor at my next visit"]},
-            {"a": 0, "b": 7, "queries": ["what should I tell my dentist", "is it safe to have dental work done"]},
-            {"a": 0, "b": 4, "queries": ["should I change my diet while on medication", "does my new diet affect my treatment"]},
-        ],
-    })
+    users.append(
+        {
+            "memories": [
+                {
+                    "text": "My doctor put me on warfarin for my blood clot last month",
+                    "entities": ["warfarin", "blood clot"],
+                    "themes": ["health", "medication"],
+                    "day": 0,
+                },
+                {
+                    "text": "I've been taking St. John's Wort for my mood lately",
+                    "entities": ["st johns wort"],
+                    "themes": ["health", "medication", "mental health"],
+                    "day": 15,
+                },
+                {
+                    "text": "I love going for morning runs in the park",
+                    "entities": ["park"],
+                    "themes": ["exercise", "routine"],
+                    "day": 3,
+                },
+                {
+                    "text": "My sister's wedding is next month and I'm the best man",
+                    "entities": ["sister"],
+                    "themes": ["family", "events"],
+                    "day": 20,
+                },
+                {
+                    "text": "I switched to a vegetarian diet three weeks ago",
+                    "entities": [],
+                    "themes": ["diet", "health"],
+                    "day": 10,
+                },
+                {
+                    "text": "Been having trouble sleeping, might try melatonin",
+                    "entities": ["melatonin"],
+                    "themes": ["health", "sleep"],
+                    "day": 25,
+                },
+                {
+                    "text": "My blood pressure has been running a bit high lately",
+                    "entities": ["blood pressure"],
+                    "themes": ["health"],
+                    "day": 18,
+                },
+                {
+                    "text": "I have a dentist appointment next Tuesday",
+                    "entities": ["dentist"],
+                    "themes": ["health", "appointments"],
+                    "day": 28,
+                },
+                {
+                    "text": "Started a new project at work managing the cloud migration",
+                    "entities": ["cloud migration"],
+                    "themes": ["work", "technology"],
+                    "day": 5,
+                },
+                {
+                    "text": "I need to pick up my prescription refill from CVS",
+                    "entities": ["CVS", "prescription"],
+                    "themes": ["health", "medication", "errands"],
+                    "day": 22,
+                },
+            ],
+            "edges": [
+                {
+                    "a": 0,
+                    "b": 1,
+                    "type": "complementary",
+                    "weight": 0.95,
+                    "implication": "Dangerous drug interaction: St. John's Wort reduces warfarin effectiveness, increasing clotting risk",
+                },
+                {
+                    "a": 0,
+                    "b": 7,
+                    "type": "complementary",
+                    "weight": 0.8,
+                    "implication": "Dentist needs to know about warfarin due to bleeding risk during procedures",
+                },
+                {"a": 0, "b": 9, "type": "elaborative", "weight": 0.7},
+                {"a": 1, "b": 5, "type": "entity_overlap", "weight": 0.5},
+                {"a": 0, "b": 6, "type": "elaborative", "weight": 0.6},
+                {
+                    "a": 4,
+                    "b": 0,
+                    "type": "complementary",
+                    "weight": 0.7,
+                    "implication": "Vegetarian diet changes vitamin K intake which affects warfarin dosing",
+                },
+            ],
+            "retrieval": [
+                {
+                    "query": "I have a terrible headache, should I just take ibuprofen?",
+                    "direct": [0],
+                    "joint": [[0, 1]],
+                },
+                {
+                    "query": "What medications am I currently taking?",
+                    "direct": [0, 1, 5],
+                    "joint": [],
+                },
+                {
+                    "query": "Do I have any upcoming appointments?",
+                    "direct": [3, 7],
+                    "joint": [],
+                },
+                {
+                    "query": "Should I be worried about anything health-related?",
+                    "direct": [0, 6],
+                    "joint": [[0, 1], [0, 4]],
+                },
+            ],
+            "synthesis": [
+                {
+                    "a": 0,
+                    "b": 1,
+                    "queries": [
+                        "should I take ibuprofen for my headache",
+                        "are there any risks with my current medications",
+                        "what should I tell my doctor at my next visit",
+                    ],
+                },
+                {
+                    "a": 0,
+                    "b": 7,
+                    "queries": [
+                        "what should I tell my dentist",
+                        "is it safe to have dental work done",
+                    ],
+                },
+                {
+                    "a": 0,
+                    "b": 4,
+                    "queries": [
+                        "should I change my diet while on medication",
+                        "does my new diet affect my treatment",
+                    ],
+                },
+            ],
+        }
+    )
 
     # user 1: career and skills
-    users.append({
-        "memories": [
-            {"text": "I manage a team of 5 software engineers", "entities": ["team"], "themes": ["work", "management"], "day": 0},
-            {"text": "We're planning to migrate our infrastructure to GCP", "entities": ["GCP"], "themes": ["work", "technology", "cloud"], "day": 5},
-            {"text": "Two of my engineers only have AWS experience", "entities": ["AWS"], "themes": ["work", "skills", "cloud"], "day": 8},
-            {"text": "I've been learning Kubernetes in my spare time", "entities": ["Kubernetes"], "themes": ["technology", "learning"], "day": 12},
-            {"text": "The migration deadline is end of Q2", "entities": ["Q2"], "themes": ["work", "deadlines"], "day": 15},
-            {"text": "My wife and I are expecting our first child in June", "entities": ["wife", "child"], "themes": ["family", "life events"], "day": 10},
-            {"text": "I've been feeling burned out from the long hours", "entities": [], "themes": ["work", "mental health", "burnout"], "day": 20},
-            {"text": "Our team's sprint velocity has dropped 30% this quarter", "entities": ["sprint velocity"], "themes": ["work", "productivity"], "day": 22},
-            {"text": "I got a LinkedIn message from a recruiter at a startup", "entities": ["LinkedIn", "recruiter"], "themes": ["career", "opportunity"], "day": 25},
-            {"text": "My performance review is coming up next month", "entities": ["performance review"], "themes": ["work", "career"], "day": 27},
-        ],
-        "edges": [
-            {"a": 1, "b": 2, "type": "complementary", "weight": 0.9, "implication": "Skills gap risk: team needs GCP skills but key members only know AWS"},
-            {"a": 0, "b": 7, "type": "causal", "weight": 0.7},
-            {"a": 1, "b": 4, "type": "temporal_sequence", "weight": 0.8},
-            {"a": 4, "b": 5, "type": "complementary", "weight": 0.85, "implication": "Migration deadline and baby due date both in Q2 - major capacity conflict"},
-            {"a": 6, "b": 7, "type": "causal", "weight": 0.75},
-            {"a": 6, "b": 8, "type": "causal", "weight": 0.6},
-            {"a": 3, "b": 1, "type": "elaborative", "weight": 0.65},
-            {"a": 9, "b": 7, "type": "complementary", "weight": 0.7, "implication": "Performance review coming while team velocity is down"},
-        ],
-        "retrieval": [
-            {"query": "What risks should I think about for the migration?", "direct": [1, 4], "joint": [[1, 2], [4, 5]]},
-            {"query": "Should I consider the recruiter's offer?", "direct": [8], "joint": [[6, 7, 8]]},
-            {"query": "How should I prepare for my performance review?", "direct": [9], "joint": [[7, 9], [0, 7]]},
-        ],
-        "synthesis": [
-            {"a": 1, "b": 2, "queries": ["what training does my team need", "what are the biggest risks for the GCP migration"]},
-            {"a": 4, "b": 5, "queries": ["how should I plan my Q2 schedule", "will I have enough bandwidth for the migration"]},
-            {"a": 9, "b": 7, "queries": ["what should I highlight in my review", "am I at risk in my performance review"]},
-        ],
-    })
+    users.append(
+        {
+            "memories": [
+                {
+                    "text": "I manage a team of 5 software engineers",
+                    "entities": ["team"],
+                    "themes": ["work", "management"],
+                    "day": 0,
+                },
+                {
+                    "text": "We're planning to migrate our infrastructure to GCP",
+                    "entities": ["GCP"],
+                    "themes": ["work", "technology", "cloud"],
+                    "day": 5,
+                },
+                {
+                    "text": "Two of my engineers only have AWS experience",
+                    "entities": ["AWS"],
+                    "themes": ["work", "skills", "cloud"],
+                    "day": 8,
+                },
+                {
+                    "text": "I've been learning Kubernetes in my spare time",
+                    "entities": ["Kubernetes"],
+                    "themes": ["technology", "learning"],
+                    "day": 12,
+                },
+                {
+                    "text": "The migration deadline is end of Q2",
+                    "entities": ["Q2"],
+                    "themes": ["work", "deadlines"],
+                    "day": 15,
+                },
+                {
+                    "text": "My wife and I are expecting our first child in June",
+                    "entities": ["wife", "child"],
+                    "themes": ["family", "life events"],
+                    "day": 10,
+                },
+                {
+                    "text": "I've been feeling burned out from the long hours",
+                    "entities": [],
+                    "themes": ["work", "mental health", "burnout"],
+                    "day": 20,
+                },
+                {
+                    "text": "Our team's sprint velocity has dropped 30% this quarter",
+                    "entities": ["sprint velocity"],
+                    "themes": ["work", "productivity"],
+                    "day": 22,
+                },
+                {
+                    "text": "I got a LinkedIn message from a recruiter at a startup",
+                    "entities": ["LinkedIn", "recruiter"],
+                    "themes": ["career", "opportunity"],
+                    "day": 25,
+                },
+                {
+                    "text": "My performance review is coming up next month",
+                    "entities": ["performance review"],
+                    "themes": ["work", "career"],
+                    "day": 27,
+                },
+            ],
+            "edges": [
+                {
+                    "a": 1,
+                    "b": 2,
+                    "type": "complementary",
+                    "weight": 0.9,
+                    "implication": "Skills gap risk: team needs GCP skills but key members only know AWS",
+                },
+                {"a": 0, "b": 7, "type": "causal", "weight": 0.7},
+                {"a": 1, "b": 4, "type": "temporal_sequence", "weight": 0.8},
+                {
+                    "a": 4,
+                    "b": 5,
+                    "type": "complementary",
+                    "weight": 0.85,
+                    "implication": "Migration deadline and baby due date both in Q2 - major capacity conflict",
+                },
+                {"a": 6, "b": 7, "type": "causal", "weight": 0.75},
+                {"a": 6, "b": 8, "type": "causal", "weight": 0.6},
+                {"a": 3, "b": 1, "type": "elaborative", "weight": 0.65},
+                {
+                    "a": 9,
+                    "b": 7,
+                    "type": "complementary",
+                    "weight": 0.7,
+                    "implication": "Performance review coming while team velocity is down",
+                },
+            ],
+            "retrieval": [
+                {
+                    "query": "What risks should I think about for the migration?",
+                    "direct": [1, 4],
+                    "joint": [[1, 2], [4, 5]],
+                },
+                {
+                    "query": "Should I consider the recruiter's offer?",
+                    "direct": [8],
+                    "joint": [[6, 7, 8]],
+                },
+                {
+                    "query": "How should I prepare for my performance review?",
+                    "direct": [9],
+                    "joint": [[7, 9], [0, 7]],
+                },
+            ],
+            "synthesis": [
+                {
+                    "a": 1,
+                    "b": 2,
+                    "queries": [
+                        "what training does my team need",
+                        "what are the biggest risks for the GCP migration",
+                    ],
+                },
+                {
+                    "a": 4,
+                    "b": 5,
+                    "queries": [
+                        "how should I plan my Q2 schedule",
+                        "will I have enough bandwidth for the migration",
+                    ],
+                },
+                {
+                    "a": 9,
+                    "b": 7,
+                    "queries": [
+                        "what should I highlight in my review",
+                        "am I at risk in my performance review",
+                    ],
+                },
+            ],
+        }
+    )
 
     # user 2: travel and dietary
-    users.append({
-        "memories": [
-            {"text": "I've been vegetarian for five years now", "entities": [], "themes": ["diet", "lifestyle"], "day": 0},
-            {"text": "Planning a three-week trip to rural Japan next spring", "entities": ["Japan"], "themes": ["travel", "planning"], "day": 5},
-            {"text": "I'm severely allergic to shellfish", "entities": ["shellfish"], "themes": ["health", "diet", "allergy"], "day": 2},
-            {"text": "I speak basic conversational Japanese from college", "entities": ["Japanese"], "themes": ["language", "skills"], "day": 3},
-            {"text": "My budget for the trip is about $4000", "entities": [], "themes": ["travel", "finance"], "day": 7},
-            {"text": "I practice yoga every morning without fail", "entities": ["yoga"], "themes": ["exercise", "routine"], "day": 1},
-            {"text": "I recently got certified as a scuba diver", "entities": ["scuba"], "themes": ["hobbies", "sports"], "day": 15},
-            {"text": "My partner doesn't eat gluten", "entities": ["partner"], "themes": ["diet", "relationships"], "day": 8},
-            {"text": "I've been reading Haruki Murakami novels obsessively", "entities": ["Murakami"], "themes": ["hobbies", "literature", "Japan"], "day": 10},
-            {"text": "I need to renew my passport before the trip", "entities": ["passport"], "themes": ["travel", "errands"], "day": 12},
-        ],
-        "edges": [
-            {"a": 0, "b": 1, "type": "complementary", "weight": 0.9, "implication": "Being vegetarian in rural Japan is very challenging - limited options, dashi in everything"},
-            {"a": 2, "b": 1, "type": "complementary", "weight": 0.85, "implication": "Shellfish allergy in Japan is dangerous - hidden shellfish in many dishes, need to communicate clearly"},
-            {"a": 3, "b": 1, "type": "elaborative", "weight": 0.7},
-            {"a": 3, "b": 2, "type": "complementary", "weight": 0.75, "implication": "Japanese language skills needed to communicate allergy - could be life-saving"},
-            {"a": 7, "b": 1, "type": "complementary", "weight": 0.8, "implication": "Partner's gluten restriction adds another dietary constraint for Japan trip"},
-            {"a": 8, "b": 1, "type": "entity_overlap", "weight": 0.5},
-            {"a": 6, "b": 1, "type": "complementary", "weight": 0.6, "implication": "Could plan scuba diving in Okinawa during Japan trip"},
-            {"a": 9, "b": 1, "type": "temporal_sequence", "weight": 0.7},
-        ],
-        "retrieval": [
-            {"query": "Help me plan meals for my trip", "direct": [1], "joint": [[0, 1], [2, 1], [7, 1]]},
-            {"query": "What should I pack for Japan?", "direct": [1], "joint": [[5, 1]]},
-            {"query": "Are there any safety concerns for my trip?", "direct": [1, 9], "joint": [[2, 1, 3]]},
-        ],
-        "synthesis": [
-            {"a": 0, "b": 1, "queries": ["where can I eat in rural Japan", "will I be able to find food I can eat"]},
-            {"a": 2, "b": 1, "queries": ["what allergy card should I carry in Japan", "how do I explain my allergy in Japanese"]},
-            {"a": 2, "b": 3, "queries": ["how do I say I'm allergic to shellfish in Japanese"]},
-        ],
-    })
+    users.append(
+        {
+            "memories": [
+                {
+                    "text": "I've been vegetarian for five years now",
+                    "entities": [],
+                    "themes": ["diet", "lifestyle"],
+                    "day": 0,
+                },
+                {
+                    "text": "Planning a three-week trip to rural Japan next spring",
+                    "entities": ["Japan"],
+                    "themes": ["travel", "planning"],
+                    "day": 5,
+                },
+                {
+                    "text": "I'm severely allergic to shellfish",
+                    "entities": ["shellfish"],
+                    "themes": ["health", "diet", "allergy"],
+                    "day": 2,
+                },
+                {
+                    "text": "I speak basic conversational Japanese from college",
+                    "entities": ["Japanese"],
+                    "themes": ["language", "skills"],
+                    "day": 3,
+                },
+                {
+                    "text": "My budget for the trip is about $4000",
+                    "entities": [],
+                    "themes": ["travel", "finance"],
+                    "day": 7,
+                },
+                {
+                    "text": "I practice yoga every morning without fail",
+                    "entities": ["yoga"],
+                    "themes": ["exercise", "routine"],
+                    "day": 1,
+                },
+                {
+                    "text": "I recently got certified as a scuba diver",
+                    "entities": ["scuba"],
+                    "themes": ["hobbies", "sports"],
+                    "day": 15,
+                },
+                {
+                    "text": "My partner doesn't eat gluten",
+                    "entities": ["partner"],
+                    "themes": ["diet", "relationships"],
+                    "day": 8,
+                },
+                {
+                    "text": "I've been reading Haruki Murakami novels obsessively",
+                    "entities": ["Murakami"],
+                    "themes": ["hobbies", "literature", "Japan"],
+                    "day": 10,
+                },
+                {
+                    "text": "I need to renew my passport before the trip",
+                    "entities": ["passport"],
+                    "themes": ["travel", "errands"],
+                    "day": 12,
+                },
+            ],
+            "edges": [
+                {
+                    "a": 0,
+                    "b": 1,
+                    "type": "complementary",
+                    "weight": 0.9,
+                    "implication": "Being vegetarian in rural Japan is very challenging - limited options, dashi in everything",
+                },
+                {
+                    "a": 2,
+                    "b": 1,
+                    "type": "complementary",
+                    "weight": 0.85,
+                    "implication": "Shellfish allergy in Japan is dangerous - hidden shellfish in many dishes, need to communicate clearly",
+                },
+                {"a": 3, "b": 1, "type": "elaborative", "weight": 0.7},
+                {
+                    "a": 3,
+                    "b": 2,
+                    "type": "complementary",
+                    "weight": 0.75,
+                    "implication": "Japanese language skills needed to communicate allergy - could be life-saving",
+                },
+                {
+                    "a": 7,
+                    "b": 1,
+                    "type": "complementary",
+                    "weight": 0.8,
+                    "implication": "Partner's gluten restriction adds another dietary constraint for Japan trip",
+                },
+                {"a": 8, "b": 1, "type": "entity_overlap", "weight": 0.5},
+                {
+                    "a": 6,
+                    "b": 1,
+                    "type": "complementary",
+                    "weight": 0.6,
+                    "implication": "Could plan scuba diving in Okinawa during Japan trip",
+                },
+                {"a": 9, "b": 1, "type": "temporal_sequence", "weight": 0.7},
+            ],
+            "retrieval": [
+                {
+                    "query": "Help me plan meals for my trip",
+                    "direct": [1],
+                    "joint": [[0, 1], [2, 1], [7, 1]],
+                },
+                {
+                    "query": "What should I pack for Japan?",
+                    "direct": [1],
+                    "joint": [[5, 1]],
+                },
+                {
+                    "query": "Are there any safety concerns for my trip?",
+                    "direct": [1, 9],
+                    "joint": [[2, 1, 3]],
+                },
+            ],
+            "synthesis": [
+                {
+                    "a": 0,
+                    "b": 1,
+                    "queries": [
+                        "where can I eat in rural Japan",
+                        "will I be able to find food I can eat",
+                    ],
+                },
+                {
+                    "a": 2,
+                    "b": 1,
+                    "queries": [
+                        "what allergy card should I carry in Japan",
+                        "how do I explain my allergy in Japanese",
+                    ],
+                },
+                {
+                    "a": 2,
+                    "b": 3,
+                    "queries": ["how do I say I'm allergic to shellfish in Japanese"],
+                },
+            ],
+        }
+    )
 
     # user 3: emotional patterns
-    users.append({
-        "memories": [
-            {"text": "Had a panic attack before my presentation at the all-hands meeting", "entities": ["presentation", "all-hands"], "themes": ["work", "mental health", "anxiety"], "day": 0},
-            {"text": "Skipped the team offsite last weekend, said I was sick", "entities": ["team offsite"], "themes": ["work", "avoidance", "social"], "day": 10},
-            {"text": "My manager mentioned I seem less engaged lately", "entities": ["manager"], "themes": ["work", "feedback"], "day": 15},
-            {"text": "I've been invited to give a talk at the regional conference", "entities": ["conference"], "themes": ["work", "career", "public speaking"], "day": 20},
-            {"text": "Started seeing a therapist for general anxiety", "entities": ["therapist"], "themes": ["mental health", "treatment"], "day": 12},
-            {"text": "I really enjoy the coding parts of my job", "entities": [], "themes": ["work", "satisfaction"], "day": 5},
-            {"text": "My gym routine has been really inconsistent this month", "entities": ["gym"], "themes": ["exercise", "routine", "wellbeing"], "day": 18},
-            {"text": "I keep declining after-work social invitations", "entities": [], "themes": ["social", "avoidance"], "day": 22},
-        ],
-        "edges": [
-            {"a": 0, "b": 3, "type": "complementary", "weight": 0.9, "implication": "Pattern: anxiety before presentations + now invited to conference talk = likely anxiety trigger"},
-            {"a": 0, "b": 1, "type": "causal", "weight": 0.8},
-            {"a": 1, "b": 2, "type": "causal", "weight": 0.7},
-            {"a": 1, "b": 7, "type": "elaborative", "weight": 0.75},
-            {"a": 0, "b": 4, "type": "causal", "weight": 0.65},
-            {"a": 2, "b": 7, "type": "elaborative", "weight": 0.6},
-            {"a": 6, "b": 0, "type": "complementary", "weight": 0.5, "implication": "Physical routine disruption often correlates with anxiety episodes"},
-        ],
-        "retrieval": [
-            {"query": "Should I accept the conference speaking invitation?", "direct": [3], "joint": [[0, 3], [0, 4, 3]]},
-            {"query": "What should I talk about with my therapist?", "direct": [4], "joint": [[0, 1, 2, 7]]},
-            {"query": "Why do I feel so disconnected from work?", "direct": [2, 5], "joint": [[1, 2, 7]]},
-        ],
-        "synthesis": [
-            {"a": 0, "b": 3, "queries": ["will I be able to handle the conference talk", "should I prepare differently for this presentation"]},
-        ],
-    })
+    users.append(
+        {
+            "memories": [
+                {
+                    "text": "Had a panic attack before my presentation at the all-hands meeting",
+                    "entities": ["presentation", "all-hands"],
+                    "themes": ["work", "mental health", "anxiety"],
+                    "day": 0,
+                },
+                {
+                    "text": "Skipped the team offsite last weekend, said I was sick",
+                    "entities": ["team offsite"],
+                    "themes": ["work", "avoidance", "social"],
+                    "day": 10,
+                },
+                {
+                    "text": "My manager mentioned I seem less engaged lately",
+                    "entities": ["manager"],
+                    "themes": ["work", "feedback"],
+                    "day": 15,
+                },
+                {
+                    "text": "I've been invited to give a talk at the regional conference",
+                    "entities": ["conference"],
+                    "themes": ["work", "career", "public speaking"],
+                    "day": 20,
+                },
+                {
+                    "text": "Started seeing a therapist for general anxiety",
+                    "entities": ["therapist"],
+                    "themes": ["mental health", "treatment"],
+                    "day": 12,
+                },
+                {
+                    "text": "I really enjoy the coding parts of my job",
+                    "entities": [],
+                    "themes": ["work", "satisfaction"],
+                    "day": 5,
+                },
+                {
+                    "text": "My gym routine has been really inconsistent this month",
+                    "entities": ["gym"],
+                    "themes": ["exercise", "routine", "wellbeing"],
+                    "day": 18,
+                },
+                {
+                    "text": "I keep declining after-work social invitations",
+                    "entities": [],
+                    "themes": ["social", "avoidance"],
+                    "day": 22,
+                },
+            ],
+            "edges": [
+                {
+                    "a": 0,
+                    "b": 3,
+                    "type": "complementary",
+                    "weight": 0.9,
+                    "implication": "Pattern: anxiety before presentations + now invited to conference talk = likely anxiety trigger",
+                },
+                {"a": 0, "b": 1, "type": "causal", "weight": 0.8},
+                {"a": 1, "b": 2, "type": "causal", "weight": 0.7},
+                {"a": 1, "b": 7, "type": "elaborative", "weight": 0.75},
+                {"a": 0, "b": 4, "type": "causal", "weight": 0.65},
+                {"a": 2, "b": 7, "type": "elaborative", "weight": 0.6},
+                {
+                    "a": 6,
+                    "b": 0,
+                    "type": "complementary",
+                    "weight": 0.5,
+                    "implication": "Physical routine disruption often correlates with anxiety episodes",
+                },
+            ],
+            "retrieval": [
+                {
+                    "query": "Should I accept the conference speaking invitation?",
+                    "direct": [3],
+                    "joint": [[0, 3], [0, 4, 3]],
+                },
+                {
+                    "query": "What should I talk about with my therapist?",
+                    "direct": [4],
+                    "joint": [[0, 1, 2, 7]],
+                },
+                {
+                    "query": "Why do I feel so disconnected from work?",
+                    "direct": [2, 5],
+                    "joint": [[1, 2, 7]],
+                },
+            ],
+            "synthesis": [
+                {
+                    "a": 0,
+                    "b": 3,
+                    "queries": [
+                        "will I be able to handle the conference talk",
+                        "should I prepare differently for this presentation",
+                    ],
+                },
+            ],
+        }
+    )
 
     # user 4: recommendations and preferences
-    users.append({
-        "memories": [
-            {"text": "I absolutely loved the movie Arrival - the way it handles time and language was incredible", "entities": ["Arrival"], "themes": ["entertainment", "preferences", "sci-fi"], "day": 0},
-            {"text": "Been reading a lot of Jorge Luis Borges short stories", "entities": ["Borges"], "themes": ["literature", "preferences"], "day": 5},
-            {"text": "I prefer slow, thoughtful content over action-packed stuff", "entities": [], "themes": ["preferences", "entertainment"], "day": 8},
-            {"text": "Just finished Annihilation by Jeff VanderMeer and loved it", "entities": ["Annihilation", "VanderMeer"], "themes": ["literature", "preferences", "sci-fi"], "day": 12},
-            {"text": "I find most Marvel movies pretty boring honestly", "entities": ["Marvel"], "themes": ["preferences", "entertainment"], "day": 3},
-            {"text": "Stalker by Tarkovsky is my favorite film of all time", "entities": ["Stalker", "Tarkovsky"], "themes": ["entertainment", "preferences", "film"], "day": 1},
-            {"text": "I've been getting into ambient electronic music lately", "entities": [], "themes": ["music", "preferences"], "day": 15},
-            {"text": "Tried watching the latest Netflix action thriller, turned it off after 20 minutes", "entities": ["Netflix"], "themes": ["entertainment", "preferences"], "day": 18},
-        ],
-        "edges": [
-            {"a": 0, "b": 1, "type": "complementary", "weight": 0.8, "implication": "Both involve themes of time, infinity, and language - clear aesthetic pattern"},
-            {"a": 0, "b": 5, "type": "entity_overlap", "weight": 0.6},
-            {"a": 2, "b": 4, "type": "elaborative", "weight": 0.7},
-            {"a": 2, "b": 7, "type": "elaborative", "weight": 0.7},
-            {"a": 0, "b": 3, "type": "entity_overlap", "weight": 0.65},
-            {"a": 3, "b": 5, "type": "complementary", "weight": 0.7, "implication": "Both atmospheric, mysterious sci-fi - VanderMeer and Tarkovsky share aesthetic sensibility"},
-            {"a": 6, "b": 2, "type": "elaborative", "weight": 0.5},
-        ],
-        "retrieval": [
-            {"query": "What should I watch tonight?", "direct": [2], "joint": [[0, 2, 5], [4, 7]]},
-            {"query": "Can you recommend a book for me?", "direct": [], "joint": [[1, 3, 2]]},
-            {"query": "What kind of content do I like?", "direct": [2, 4], "joint": [[0, 1, 3, 5, 6]]},
-        ],
-        "synthesis": [
-            {"a": 0, "b": 1, "queries": ["what movie should I watch", "what book should I read next"]},
-            {"a": 3, "b": 5, "queries": ["recommend something atmospheric and mysterious"]},
-        ],
-    })
+    users.append(
+        {
+            "memories": [
+                {
+                    "text": "I absolutely loved the movie Arrival - the way it handles time and language was incredible",
+                    "entities": ["Arrival"],
+                    "themes": ["entertainment", "preferences", "sci-fi"],
+                    "day": 0,
+                },
+                {
+                    "text": "Been reading a lot of Jorge Luis Borges short stories",
+                    "entities": ["Borges"],
+                    "themes": ["literature", "preferences"],
+                    "day": 5,
+                },
+                {
+                    "text": "I prefer slow, thoughtful content over action-packed stuff",
+                    "entities": [],
+                    "themes": ["preferences", "entertainment"],
+                    "day": 8,
+                },
+                {
+                    "text": "Just finished Annihilation by Jeff VanderMeer and loved it",
+                    "entities": ["Annihilation", "VanderMeer"],
+                    "themes": ["literature", "preferences", "sci-fi"],
+                    "day": 12,
+                },
+                {
+                    "text": "I find most Marvel movies pretty boring honestly",
+                    "entities": ["Marvel"],
+                    "themes": ["preferences", "entertainment"],
+                    "day": 3,
+                },
+                {
+                    "text": "Stalker by Tarkovsky is my favorite film of all time",
+                    "entities": ["Stalker", "Tarkovsky"],
+                    "themes": ["entertainment", "preferences", "film"],
+                    "day": 1,
+                },
+                {
+                    "text": "I've been getting into ambient electronic music lately",
+                    "entities": [],
+                    "themes": ["music", "preferences"],
+                    "day": 15,
+                },
+                {
+                    "text": "Tried watching the latest Netflix action thriller, turned it off after 20 minutes",
+                    "entities": ["Netflix"],
+                    "themes": ["entertainment", "preferences"],
+                    "day": 18,
+                },
+            ],
+            "edges": [
+                {
+                    "a": 0,
+                    "b": 1,
+                    "type": "complementary",
+                    "weight": 0.8,
+                    "implication": "Both involve themes of time, infinity, and language - clear aesthetic pattern",
+                },
+                {"a": 0, "b": 5, "type": "entity_overlap", "weight": 0.6},
+                {"a": 2, "b": 4, "type": "elaborative", "weight": 0.7},
+                {"a": 2, "b": 7, "type": "elaborative", "weight": 0.7},
+                {"a": 0, "b": 3, "type": "entity_overlap", "weight": 0.65},
+                {
+                    "a": 3,
+                    "b": 5,
+                    "type": "complementary",
+                    "weight": 0.7,
+                    "implication": "Both atmospheric, mysterious sci-fi - VanderMeer and Tarkovsky share aesthetic sensibility",
+                },
+                {"a": 6, "b": 2, "type": "elaborative", "weight": 0.5},
+            ],
+            "retrieval": [
+                {
+                    "query": "What should I watch tonight?",
+                    "direct": [2],
+                    "joint": [[0, 2, 5], [4, 7]],
+                },
+                {
+                    "query": "Can you recommend a book for me?",
+                    "direct": [],
+                    "joint": [[1, 3, 2]],
+                },
+                {
+                    "query": "What kind of content do I like?",
+                    "direct": [2, 4],
+                    "joint": [[0, 1, 3, 5, 6]],
+                },
+            ],
+            "synthesis": [
+                {
+                    "a": 0,
+                    "b": 1,
+                    "queries": [
+                        "what movie should I watch",
+                        "what book should I read next",
+                    ],
+                },
+                {
+                    "a": 3,
+                    "b": 5,
+                    "queries": ["recommend something atmospheric and mysterious"],
+                },
+            ],
+        }
+    )
 
     # user 5: social connections
-    users.append({
-        "memories": [
-            {"text": "My sister is an immigration lawyer in Boston", "entities": ["sister", "immigration lawyer", "Boston"], "themes": ["family", "careers"], "day": 0},
-            {"text": "My coworker Raj mentioned his H1B visa renewal is causing him stress", "entities": ["Raj", "H1B visa"], "themes": ["work", "immigration", "relationships"], "day": 10},
-            {"text": "I play basketball with Dave every Thursday", "entities": ["Dave", "basketball"], "themes": ["social", "exercise", "routine"], "day": 2},
-            {"text": "My neighbor just adopted a rescue dog from Guatemala", "entities": ["neighbor", "dog", "Guatemala"], "themes": ["community", "pets"], "day": 15},
-            {"text": "I'm organizing the company holiday party this year", "entities": ["holiday party"], "themes": ["work", "events", "social"], "day": 20},
-            {"text": "Dave's wife is a veterinarian", "entities": ["Dave", "veterinarian"], "themes": ["social", "careers"], "day": 5},
-            {"text": "Raj is one of our best engineers and I'd hate to lose him", "entities": ["Raj"], "themes": ["work", "team"], "day": 12},
-        ],
-        "edges": [
-            {"a": 0, "b": 1, "type": "complementary", "weight": 0.9, "implication": "Sister could potentially help or advise Raj with his immigration situation"},
-            {"a": 1, "b": 6, "type": "elaborative", "weight": 0.8},
-            {"a": 2, "b": 5, "type": "entity_overlap", "weight": 0.6},
-            {"a": 3, "b": 5, "type": "complementary", "weight": 0.7, "implication": "Neighbor's new rescue dog + Dave's wife is a vet - could connect them"},
-        ],
-        "retrieval": [
-            {"query": "Is there anything I can do to help Raj?", "direct": [1, 6], "joint": [[0, 1]]},
-            {"query": "My neighbor's dog seems sick, who should they call?", "direct": [3], "joint": [[3, 5]]},
-        ],
-        "synthesis": [
-            {"a": 0, "b": 1, "queries": ["can anyone I know help with visa issues", "how can I support Raj"]},
-            {"a": 3, "b": 5, "queries": ["does anyone I know work with animals"]},
-        ],
-    })
+    users.append(
+        {
+            "memories": [
+                {
+                    "text": "My sister is an immigration lawyer in Boston",
+                    "entities": ["sister", "immigration lawyer", "Boston"],
+                    "themes": ["family", "careers"],
+                    "day": 0,
+                },
+                {
+                    "text": "My coworker Raj mentioned his H1B visa renewal is causing him stress",
+                    "entities": ["Raj", "H1B visa"],
+                    "themes": ["work", "immigration", "relationships"],
+                    "day": 10,
+                },
+                {
+                    "text": "I play basketball with Dave every Thursday",
+                    "entities": ["Dave", "basketball"],
+                    "themes": ["social", "exercise", "routine"],
+                    "day": 2,
+                },
+                {
+                    "text": "My neighbor just adopted a rescue dog from Guatemala",
+                    "entities": ["neighbor", "dog", "Guatemala"],
+                    "themes": ["community", "pets"],
+                    "day": 15,
+                },
+                {
+                    "text": "I'm organizing the company holiday party this year",
+                    "entities": ["holiday party"],
+                    "themes": ["work", "events", "social"],
+                    "day": 20,
+                },
+                {
+                    "text": "Dave's wife is a veterinarian",
+                    "entities": ["Dave", "veterinarian"],
+                    "themes": ["social", "careers"],
+                    "day": 5,
+                },
+                {
+                    "text": "Raj is one of our best engineers and I'd hate to lose him",
+                    "entities": ["Raj"],
+                    "themes": ["work", "team"],
+                    "day": 12,
+                },
+            ],
+            "edges": [
+                {
+                    "a": 0,
+                    "b": 1,
+                    "type": "complementary",
+                    "weight": 0.9,
+                    "implication": "Sister could potentially help or advise Raj with his immigration situation",
+                },
+                {"a": 1, "b": 6, "type": "elaborative", "weight": 0.8},
+                {"a": 2, "b": 5, "type": "entity_overlap", "weight": 0.6},
+                {
+                    "a": 3,
+                    "b": 5,
+                    "type": "complementary",
+                    "weight": 0.7,
+                    "implication": "Neighbor's new rescue dog + Dave's wife is a vet - could connect them",
+                },
+            ],
+            "retrieval": [
+                {
+                    "query": "Is there anything I can do to help Raj?",
+                    "direct": [1, 6],
+                    "joint": [[0, 1]],
+                },
+                {
+                    "query": "My neighbor's dog seems sick, who should they call?",
+                    "direct": [3],
+                    "joint": [[3, 5]],
+                },
+            ],
+            "synthesis": [
+                {
+                    "a": 0,
+                    "b": 1,
+                    "queries": [
+                        "can anyone I know help with visa issues",
+                        "how can I support Raj",
+                    ],
+                },
+                {"a": 3, "b": 5, "queries": ["does anyone I know work with animals"]},
+            ],
+        }
+    )
 
     return users
 
@@ -421,6 +973,7 @@ async def generate_llm_dataset(config: DataGenConfig) -> dict:
 
     if config.llm_provider == "anthropic":
         from anthropic import AsyncAnthropic
+
         client = AsyncAnthropic()
 
         async def call_llm(prompt: str) -> str:
@@ -433,10 +986,12 @@ async def generate_llm_dataset(config: DataGenConfig) -> dict:
 
     elif config.llm_provider == "vllm":
         # vllm serves an openai compatible api, use openai client with custom base_url
+        # works with local vllm servers and runpod serverless endpoints
         from openai import AsyncOpenAI
+
         client = AsyncOpenAI(
             base_url=config.vllm_url,
-            api_key="not-needed",  # vllm doesnt need a key
+            api_key=config.vllm_api_key,
         )
 
         async def call_llm(prompt: str) -> str:
@@ -450,6 +1005,7 @@ async def generate_llm_dataset(config: DataGenConfig) -> dict:
 
     else:
         from openai import AsyncOpenAI
+
         client = AsyncOpenAI()
 
         async def call_llm(prompt: str) -> str:
@@ -491,17 +1047,24 @@ async def generate_llm_dataset(config: DataGenConfig) -> dict:
         memories = user["memories"]
 
         for i, m in enumerate(memories):
-            all_memories.append(Memory(
-                text=m["text"], user_id=uid, memory_idx=i,
-                entities=m.get("entities", []),
-                themes=m.get("themes", []),
-                timestamp_days=m.get("day", i),
-            ))
+            all_memories.append(
+                Memory(
+                    text=m["text"],
+                    user_id=uid,
+                    memory_idx=i,
+                    entities=m.get("entities", []),
+                    themes=m.get("themes", []),
+                    timestamp_days=m.get("day", i),
+                )
+            )
 
         # edge labels for sampled pairs (batched: 25 pairs per LLM call)
         pairs = _sample_pairs(len(memories), config.pairs_per_user)
         EDGE_BATCH_SIZE = 25
-        pair_batches = [pairs[i:i+EDGE_BATCH_SIZE] for i in range(0, len(pairs), EDGE_BATCH_SIZE)]
+        pair_batches = [
+            pairs[i : i + EDGE_BATCH_SIZE]
+            for i in range(0, len(pairs), EDGE_BATCH_SIZE)
+        ]
         mem_text = "\n".join(f"[{i}] {m['text']}" for i, m in enumerate(memories))
 
         async def gen_edge_batch(batch):
@@ -518,13 +1081,17 @@ async def generate_llm_dataset(config: DataGenConfig) -> dict:
                     for label in labels:
                         a_idx = label.get("a", batch[0][0])
                         b_idx = label.get("b", batch[0][1])
-                        results.append(EdgeLabel(
-                            user_id=uid, memory_a_idx=a_idx, memory_b_idx=b_idx,
-                            edge_exists=label["edge_exists"],
-                            edge_type=label["edge_type"],
-                            edge_weight=label.get("edge_weight", 0.5),
-                            implication=label.get("implication", ""),
-                        ))
+                        results.append(
+                            EdgeLabel(
+                                user_id=uid,
+                                memory_a_idx=a_idx,
+                                memory_b_idx=b_idx,
+                                edge_exists=label["edge_exists"],
+                                edge_type=label["edge_type"],
+                                edge_weight=label.get("edge_weight", 0.5),
+                                implication=label.get("implication", ""),
+                            )
+                        )
                     return results
                 except Exception as e:
                     print(f"Failed edge batch user {uid}: {e}")
@@ -534,7 +1101,9 @@ async def generate_llm_dataset(config: DataGenConfig) -> dict:
         edge_results = await asyncio.gather(*edge_batch_tasks)
         edges = [e for batch in edge_results for e in batch]
         all_edges.extend(edges)
-        print(f"  user {uid}: {len(edges)} edges from {len(pair_batches)} batched calls")
+        print(
+            f"  user {uid}: {len(edges)} edges from {len(pair_batches)} batched calls"
+        )
 
         # retrieval labels
         async def gen_retrieval():
@@ -544,13 +1113,15 @@ async def generate_llm_dataset(config: DataGenConfig) -> dict:
                         f"[{i}] {m['text']}" for i, m in enumerate(memories)
                     )
                     prompt = RETRIEVAL_LABEL_PROMPT.format(
-                        memories=mem_text, n_queries=config.queries_per_user,
+                        memories=mem_text,
+                        n_queries=config.queries_per_user,
                     )
                     raw = await call_llm(prompt)
                     labels = json.loads(raw)
                     return [
                         RetrievalLabel(
-                            user_id=uid, query=l["query"],
+                            user_id=uid,
+                            query=l["query"],
                             directly_relevant=l["direct"],
                             jointly_relevant=l.get("joint", []),
                         )
@@ -564,9 +1135,14 @@ async def generate_llm_dataset(config: DataGenConfig) -> dict:
         all_retrieval.extend(retrieval)
 
         # synthesis labels for complementary edges (batched: 10 per call)
-        comp_edges = [e for e in edges if e.edge_type == "complementary" and e.edge_exists]
+        comp_edges = [
+            e for e in edges if e.edge_type == "complementary" and e.edge_exists
+        ]
         SYNTH_BATCH_SIZE = 10
-        synth_batches = [comp_edges[i:i+SYNTH_BATCH_SIZE] for i in range(0, len(comp_edges), SYNTH_BATCH_SIZE)]
+        synth_batches = [
+            comp_edges[i : i + SYNTH_BATCH_SIZE]
+            for i in range(0, len(comp_edges), SYNTH_BATCH_SIZE)
+        ]
 
         async def gen_synth_batch(batch):
             async with sem:
@@ -580,12 +1156,14 @@ async def generate_llm_dataset(config: DataGenConfig) -> dict:
                     labels = json.loads(raw)
                     results = []
                     for label in labels:
-                        results.append(SynthesisLabel(
-                            user_id=uid,
-                            memory_a_idx=label["a"],
-                            memory_b_idx=label["b"],
-                            queries=label["queries"],
-                        ))
+                        results.append(
+                            SynthesisLabel(
+                                user_id=uid,
+                                memory_a_idx=label["a"],
+                                memory_b_idx=label["b"],
+                                queries=label["queries"],
+                            )
+                        )
                     return results
                 except Exception as e:
                     print(f"Failed synthesis batch user {uid}: {e}")
@@ -595,7 +1173,9 @@ async def generate_llm_dataset(config: DataGenConfig) -> dict:
         synth_results = await asyncio.gather(*synth_batch_tasks)
         synths = [s for batch in synth_results for s in batch]
         all_synthesis.extend(synths)
-        print(f"  user {uid}: {len(synths)} synthesis from {len(synth_batches)} batched calls")
+        print(
+            f"  user {uid}: {len(synths)} synthesis from {len(synth_batches)} batched calls"
+        )
 
     _save_jsonl(output_dir / "memories.jsonl", [asdict(m) for m in all_memories])
     _save_jsonl(output_dir / "edges.jsonl", [asdict(e) for e in all_edges])
@@ -619,6 +1199,7 @@ async def generate_llm_dataset(config: DataGenConfig) -> dict:
 def _sample_pairs(n: int, num_pairs: int) -> list[tuple[int, int]]:
     """sample random pairs of indices."""
     import random
+
     pairs = set()
     max_pairs = n * (n - 1) // 2
     num_pairs = min(num_pairs, max_pairs)
