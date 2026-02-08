@@ -142,7 +142,7 @@ def generate_data_remote(
             "--port",
             "8000",
             "--attention-config.backend",
-            "FLASH_ATTN",
+            "TRITON_ATTN",
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
